@@ -1,7 +1,8 @@
 import ProjectVersions.rlVersion
 
 /*
- * Copyright (c) 2019 Owain van Brakel <https://github.com/Owain94>
+ * Copyright (c) 2021 SpoonLite
+ * Copyright (c) 2022 Fusion
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +26,7 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "5.0.4"
+version = "1.0.0"
 
 project.extra["PluginName"] = "Multi Lines"
 project.extra["PluginDescription"] = "Show borders of multicombat and PvP safezones"
@@ -40,6 +41,9 @@ dependencies {
     compileOnly(Libraries.guice)
     compileOnly(Libraries.lombok)
     compileOnly(Libraries.pf4j)
+    compileOnly(Libraries.rxjava)
+    compileOnly(Libraries.apacheCommonsText)
+    compileOnly(Libraries.annotations)
 }
 
 tasks {

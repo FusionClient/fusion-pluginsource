@@ -85,15 +85,4 @@ public interface EnvironmentAidConfig extends Config
 	{
 		return false;
 	}
-
-	@ConfigItem(
-		position = 6,
-		keyName = "smokeEffect",
-		name = "Remove Smoke",
-		description = "Removes the on-screen smoke effect from the smoke dungeon"
-	)
-	default boolean smokeEffect()
-	{
-		return false;
-	}
 }

@@ -67,21 +67,10 @@ public interface MultiIndicatorsConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "wildernessTeleportLines",
-		name = "Wilderness teleport lines",
-		description = "Show wilderness teleport lines",
-		position = 4
-	)
-	default boolean showWildernessTeleportLines()
-	{
-		return false;
-	}
-
-	@ConfigItem(
 		keyName = "wildernessLevelLines",
 		name = "Wilderness level lines",
 		description = "Show wilderness level lines",
-		position = 5
+		position = 4
 	)
 	default boolean showWildernessLevelLines()
 	{
@@ -92,7 +81,7 @@ public interface MultiIndicatorsConfig extends Config
 		keyName = "showMinimapLines",
 		name = "Show on minimap",
 		description = "Show multicombat and safe zones on the minimap",
-		position = 6
+		position = 5
 	)
 	default boolean showMinimapLines()
 	{
@@ -103,7 +92,7 @@ public interface MultiIndicatorsConfig extends Config
 		keyName = "multicombatColor",
 		name = "Multicombat zone color",
 		description = "Choose color to use for marking multicombat zones",
-		position = 7
+		position = 6
 	)
 	default Color multicombatColor()
 	{
@@ -114,7 +103,7 @@ public interface MultiIndicatorsConfig extends Config
 		keyName = "safeZoneColor",
 		name = "Safe zone color",
 		description = "Choose color to use for marking safe zones in PvP/Deadman",
-		position = 8
+		position = 7
 	)
 	default Color safeZoneColor()
 	{
@@ -122,21 +111,10 @@ public interface MultiIndicatorsConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "wildernessTeleportLinesColor",
-		name = "Wilderness teleport lines color",
-		description = "Choose color to use for marking wilderness teleport lines",
-		position = 9
-	)
-	default Color wildernessTeleportLinesColor()
-	{
-		return new Color(90, 190, 255);
-	}
-
-	@ConfigItem(
 		keyName = "wildernessLevelLinesColor",
 		name = "Wilderness level lines color",
 		description = "Choose color to use for marking wilderness level lines",
-		position = 10
+		position = 8
 	)
 	default Color wildernessLevelLinesColor()
 	{
@@ -147,7 +125,7 @@ public interface MultiIndicatorsConfig extends Config
 		keyName = "thinnerLines",
 		name = "Thin lines",
 		description = "Render multi lines, safe zone lines, and wildy level lines as 1 pixel wide instead of 2",
-		position = 11
+		position = 9
 	)
 	default boolean thinnerLines()
 	{

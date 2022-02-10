@@ -1,7 +1,8 @@
 import ProjectVersions.rlVersion
 
 /*
- * Copyright (c) 2019 Owain van Brakel <https://github.com/Owain94>
+ * Copyright (c) 2021 SpoonLite
+ * Copyright (c) 2022 Fusion
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,10 +26,10 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "5.0.6"
+version = "1.0.0"
 
 project.extra["PluginName"] = "Zulrah"
-project.extra["PluginDescription"] = "Shows tiles on where to stand during the phases and what prayer to use"
+project.extra["PluginDescription"] = "All-in-one plugin for Zulrah"
 
 dependencies {
     annotationProcessor(Libraries.lombok)
@@ -42,7 +43,7 @@ dependencies {
     compileOnly(Libraries.pf4j)
     compileOnly(Libraries.rxjava)
     compileOnly(Libraries.apacheCommonsText)
-
+    compileOnly(Libraries.annotations)
 }
 
 tasks {

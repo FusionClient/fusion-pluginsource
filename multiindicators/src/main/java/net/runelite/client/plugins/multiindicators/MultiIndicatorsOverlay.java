@@ -25,11 +25,7 @@
  */
 package net.runelite.client.plugins.multiindicators;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.GeneralPath;
 import javax.inject.Inject;
 import net.runelite.api.Client;
@@ -38,7 +34,6 @@ import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.geometry.Geometry;
 import net.runelite.client.ui.overlay.Overlay;
-import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayPriority;
 
@@ -62,7 +57,6 @@ public class MultiIndicatorsOverlay extends Overlay
 		this.plugin = plugin;
 		this.config = config;
 		setPosition(OverlayPosition.DYNAMIC);
-		setLayer(OverlayLayer.ABOVE_SCENE);
 		setPriority(OverlayPriority.LOW);
 	}
 
@@ -119,7 +113,6 @@ public class MultiIndicatorsOverlay extends Overlay
 		GeneralPath multicombatPath = plugin.getMulticombatPathToDisplay()[client.getPlane()];
 		GeneralPath pvpPath = plugin.getPvpPathToDisplay()[client.getPlane()];
 		GeneralPath wildernessLevelLinesPath = plugin.getWildernessLevelLinesPathToDisplay()[client.getPlane()];
-		GeneralPath wildernessTeleportLinesPath = plugin.getWildernessTeleportLinesPathToDisplay()[client.getPlane()];
 
 		if (config.multicombatZoneVisibility() != ZoneVisibility.HIDE && multicombatPath != null)
 		{
@@ -132,10 +125,6 @@ public class MultiIndicatorsOverlay extends Overlay
 		if (config.showWildernessLevelLines() && wildernessLevelLinesPath != null)
 		{
 			renderPath(graphics, wildernessLevelLinesPath, getTransparentColorVersion(config.wildernessLevelLinesColor()));
-		}
-		if (config.showWildernessTeleportLines() && wildernessTeleportLinesPath != null)
-		{
-			renderPath(graphics, wildernessTeleportLinesPath, getTransparentColorVersion(config.wildernessTeleportLinesColor()));
 		}
 
 		return null;

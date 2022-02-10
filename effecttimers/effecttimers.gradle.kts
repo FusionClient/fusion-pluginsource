@@ -1,8 +1,9 @@
 import ProjectVersions.rlVersion
 
 /*
- * Copyright (c) 2019 Owain van Brakel <https://github.com/Owain94>
- * All rights reserved.
+ * Copyright (c) 2020 ThatGamerBlue
+ * Copyright (c) 2022 Fusion
+ *  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,9 +26,9 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "5.0.2"
+version = "1.0.0"
 
-project.extra["PluginName"] = "Effect Timers"
+project.extra["PluginName"] = "[F] Effect Timers"
 project.extra["PluginDescription"] = "Effect timer overlay on players"
 
 dependencies {
@@ -37,24 +38,23 @@ dependencies {
     compileOnly("com.openosrs:runelite-api:$rlVersion")
     compileOnly("com.openosrs:runelite-client:$rlVersion")
 
-    compileOnly(project(":multiindicators"))
-
-    compileOnly(Libraries.apacheCommonsText)
     compileOnly(Libraries.guice)
     compileOnly(Libraries.lombok)
     compileOnly(Libraries.pf4j)
+    compileOnly(Libraries.rxjava)
+    compileOnly(Libraries.apacheCommonsText)
+    compileOnly(Libraries.annotations)
 }
 
 tasks {
     jar {
         manifest {
             attributes(mapOf(
-                    "Plugin-Version" to project.version,
-                    "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
-                    "Plugin-Provider" to project.extra["PluginProvider"],
-                    "Plugin-Dependencies" to "multilines-plugin",
-                    "Plugin-Description" to project.extra["PluginDescription"],
-                    "Plugin-License" to project.extra["PluginLicense"]
+                "Plugin-Version" to project.version,
+                "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
+                "Plugin-Provider" to project.extra["PluginProvider"],
+                "Plugin-Description" to project.extra["PluginDescription"],
+                "Plugin-License" to project.extra["PluginLicense"]
             ))
         }
     }

@@ -25,20 +25,10 @@
 package net.runelite.client.plugins.effecttimers;
 
 import com.google.inject.Provides;
-import java.util.EnumSet;
-import javax.inject.Inject;
 import lombok.Getter;
-import net.runelite.api.Actor;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.NPC;
-import net.runelite.api.WorldType;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.ActorDeath;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.events.GraphicChanged;
-import net.runelite.api.events.NpcDespawned;
+import net.runelite.api.events.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.input.KeyManager;
@@ -47,15 +37,16 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.multiindicators.MapLocations;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.HotkeyListener;
-import net.runelite.client.util.PvPUtil;
 import org.apache.commons.lang3.ArrayUtils;
-import org.pf4j.Extension;
 
-@Extension
+import javax.inject.Inject;
+import java.util.EnumSet;
+
 @PluginDescriptor(
-	name = "Effect Timers",
+	name = "[F] Effect Timers",
 	description = "Effect timer overlay on players",
-	tags = {"freeze", "timers", "barrage", "teleblock", "pklite"}
+	tags = {"freeze", "timers", "barrage", "teleblock", "pklite"},
+	enabledByDefault = false
 )
 public class EffectTimersPlugin extends Plugin
 {
@@ -96,6 +87,8 @@ public class EffectTimersPlugin extends Plugin
 	{
 		return config;
 	}
+
+	private boolean mirrorMode;
 
 	@Provides
 	public EffectTimersConfig getConfig(ConfigManager configManager)
@@ -140,7 +133,7 @@ public class EffectTimersPlugin extends Plugin
 
 			WorldPoint actorLoc = actor.getWorldLocation();
 
-			if (!WorldType.isAllPvpWorld(worldTypes) && PvPUtil.getWildernessLevelFrom(actorLoc) <= 0)
+			if (!WorldType.isPvpWorld(worldTypes) && PvPUtil.getWildernessLevelFrom(actorLoc) <= 0)
 			{
 				timerManager.setTimerFor(actor, TimerType.TELEBLOCK, new Timer(this, null));
 			}
@@ -149,7 +142,7 @@ public class EffectTimersPlugin extends Plugin
 			{
 				timerManager.setTimerFor(actor, TimerType.TELEBLOCK, new Timer(this, null));
 			}
-			else if (WorldType.isDeadmanWorld(worldTypes) &&
+			else if (WorldType.isPvpWorld(worldTypes) &&
 				MapLocations.getDeadmanSafeZones(actorLoc.getPlane()).contains(actorLoc.getX(), actorLoc.getY()))
 			{
 				timerManager.setTimerFor(actor, TimerType.TELEBLOCK, new Timer(this, null));
@@ -230,4 +223,16 @@ public class EffectTimersPlugin extends Plugin
 			timerManager.setTimerFor(event.getActor(), type, new Timer(this, null));
 		}
 	}
+
+	/*@Subscribe
+	private void onClientTick(ClientTick event)
+	{
+		if (client.isMirrored() && !mirrorMode) {
+			overlay.setLayer(OverlayLayer.AFTER_MIRROR);
+			overlayManager.remove(overlay);
+			overlayManager.add(overlay);
+			mirrorMode = true;
+		}
+	}*/
+
 }

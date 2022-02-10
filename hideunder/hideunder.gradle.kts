@@ -25,9 +25,9 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "5.0.1"
+version = "1.0.0"
 
-project.extra["PluginName"] = "Hide Under"
+project.extra["PluginName"] = "[F] Hide Under"
 project.extra["PluginDescription"] = "Hide local player when under targeted players"
 
 dependencies {
@@ -40,17 +40,20 @@ dependencies {
     compileOnly(Libraries.guice)
     compileOnly(Libraries.lombok)
     compileOnly(Libraries.pf4j)
+    compileOnly(Libraries.rxjava)
+    compileOnly(Libraries.apacheCommonsText)
+    compileOnly(Libraries.annotations)
 }
 
 tasks {
     jar {
         manifest {
             attributes(mapOf(
-                    "Plugin-Version" to project.version,
-                    "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
-                    "Plugin-Provider" to project.extra["PluginProvider"],
-                    "Plugin-Description" to project.extra["PluginDescription"],
-                    "Plugin-License" to project.extra["PluginLicense"]
+                "Plugin-Version" to project.version,
+                "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
+                "Plugin-Provider" to project.extra["PluginProvider"],
+                "Plugin-Description" to project.extra["PluginDescription"],
+                "Plugin-License" to project.extra["PluginLicense"]
             ))
         }
     }

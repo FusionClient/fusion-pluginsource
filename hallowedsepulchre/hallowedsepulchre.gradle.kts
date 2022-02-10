@@ -1,7 +1,8 @@
 import ProjectVersions.rlVersion
 
 /*
- * Copyright (c) 2020 Dutta64 <https://github.com/Dutta64>
+ * Copyright (c) 2021 SpoonLite
+ * Copyright (c) 2022 Fusion
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,10 +26,10 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "5.0.3"
+version = "1.0.3"
 
-project.extra["PluginName"] = "Hallowed Sepulchre"
-project.extra["PluginDescription"] = "Hallowed Sepulchre"
+project.extra["PluginName"] = "[F] Sepulchre"
+project.extra["PluginDescription"] = "Kyle's sepulchre plugin with additional features"
 
 dependencies {
     annotationProcessor(Libraries.lombok)
@@ -40,6 +41,9 @@ dependencies {
     compileOnly(Libraries.guice)
     compileOnly(Libraries.lombok)
     compileOnly(Libraries.pf4j)
+    compileOnly(Libraries.rxjava)
+    compileOnly(Libraries.apacheCommonsText)
+    compileOnly(Libraries.annotations)
 }
 
 tasks {

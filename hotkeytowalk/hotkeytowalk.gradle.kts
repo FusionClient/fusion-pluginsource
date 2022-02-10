@@ -1,7 +1,7 @@
 import ProjectVersions.rlVersion
 
 /*
- * Copyright (c) 2019 Owain van Brakel <https://github.com/Owain94>
+ * Copyright (c) 2022 Fusion
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,10 +25,10 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "5.1.1"
+version = "1.0.0"
 
-project.extra["PluginName"] = "Hotkey To Walk"
-project.extra["PluginDescription"] = "Use Hotkey to toggle the Walk Here menu option. While pressed you will Walk rather than interact with objects."
+project.extra["PluginName"] = "Hotkey to walk"
+project.extra["PluginDescription"] = "Hotkey to walk under things"
 
 dependencies {
     annotationProcessor(Libraries.lombok)
@@ -40,17 +40,20 @@ dependencies {
     compileOnly(Libraries.guice)
     compileOnly(Libraries.lombok)
     compileOnly(Libraries.pf4j)
+    compileOnly(Libraries.rxjava)
+    compileOnly(Libraries.apacheCommonsText)
+    compileOnly(Libraries.annotations)
 }
 
 tasks {
     jar {
         manifest {
             attributes(mapOf(
-                    "Plugin-Version" to project.version,
-                    "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
-                    "Plugin-Provider" to project.extra["PluginProvider"],
-                    "Plugin-Description" to project.extra["PluginDescription"],
-                    "Plugin-License" to project.extra["PluginLicense"]
+                "Plugin-Version" to project.version,
+                "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
+                "Plugin-Provider" to project.extra["PluginProvider"],
+                "Plugin-Description" to project.extra["PluginDescription"],
+                "Plugin-License" to project.extra["PluginLicense"]
             ))
         }
     }

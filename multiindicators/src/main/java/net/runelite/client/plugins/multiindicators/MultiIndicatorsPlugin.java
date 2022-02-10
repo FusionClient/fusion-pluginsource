@@ -1,48 +1,13 @@
-/*
- * Copyright (c) 2018, Woox <https://github.com/wooxsolo>
- * Copyright (c) 2019, Enza-Denino <https://github.com/Enza-Denino>
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 package net.runelite.client.plugins.multiindicators;
 
 import com.google.inject.Provides;
-import java.awt.Rectangle;
-import java.awt.geom.GeneralPath;
-import java.util.Arrays;
-import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Getter;
-import net.runelite.api.Client;
-import net.runelite.api.Constants;
-import net.runelite.api.GameState;
-import net.runelite.api.ObjectComposition;
-import net.runelite.api.Perspective;
-import net.runelite.api.Tile;
-import net.runelite.api.WallObject;
-import net.runelite.api.WorldType;
+import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.geometry.Geometry;
 import net.runelite.client.callback.ClientThread;
@@ -51,15 +16,21 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayManager;
 import org.pf4j.Extension;
 
+import javax.inject.Inject;
+import java.awt.*;
+import java.awt.geom.GeneralPath;
+import java.util.Arrays;
+
 @Extension
 @PluginDescriptor(
-	name = "Multi-Lines",
-	enabledByDefault = false,
-	description = "Show borders of multicombat and PvP safezones",
-	tags = {"multicombat", "lines", "pvp", "deadman", "safezones"}
+		name = "[F] Multi-Lines",
+		enabledByDefault = false,
+		description = "Show borders of multicombat and PvP safezones",
+		tags = {"multicombat", "lines", "pvp", "deadman", "safezones", "bogla"}
 )
 public class MultiIndicatorsPlugin extends Plugin
 {
@@ -91,15 +62,14 @@ public class MultiIndicatorsPlugin extends Plugin
 	private GeneralPath[] wildernessLevelLinesPathToDisplay;
 
 	@Getter(AccessLevel.PACKAGE)
-	private GeneralPath[] wildernessTeleportLinesPathToDisplay;
-
-	@Getter(AccessLevel.PACKAGE)
 	private boolean inPvp;
 
 	@Getter(AccessLevel.PACKAGE)
 	private boolean inDeadman;
 
 	private int currentPlane;
+
+	private boolean mirrorMode;
 
 	@Provides
 	MultiIndicatorsConfig getConfig(ConfigManager configManager)
@@ -138,7 +108,6 @@ public class MultiIndicatorsPlugin extends Plugin
 		multicombatPathToDisplay = new GeneralPath[Constants.MAX_Z];
 		pvpPathToDisplay = new GeneralPath[Constants.MAX_Z];
 		wildernessLevelLinesPathToDisplay = new GeneralPath[Constants.MAX_Z];
-		wildernessTeleportLinesPathToDisplay = new GeneralPath[Constants.MAX_Z];
 	}
 
 	private void uninitializePaths()
@@ -146,7 +115,6 @@ public class MultiIndicatorsPlugin extends Plugin
 		multicombatPathToDisplay = null;
 		pvpPathToDisplay = null;
 		wildernessLevelLinesPathToDisplay = null;
-		wildernessTeleportLinesPathToDisplay = null;
 	}
 
 	// sometimes the lines get offset (seems to happen when there is a delay
@@ -227,9 +195,9 @@ public class MultiIndicatorsPlugin extends Plugin
 		int dx = x2 - x1;
 		int dy = y2 - y1;
 		WorldArea wa1 = new WorldArea(new WorldPoint(
-			x1, y1, currentPlane), 1, 1);
+				x1, y1, currentPlane), 1, 1);
 		WorldArea wa2 = new WorldArea(new WorldPoint(
-			x1 - dy, y1 - dx, currentPlane), 1, 1);
+				x1 - dy, y1 - dx, currentPlane), 1, 1);
 
 		if (isOpenableAt(wa1.toWorldPoint()) || isOpenableAt(wa2.toWorldPoint()))
 		{
@@ -248,13 +216,13 @@ public class MultiIndicatorsPlugin extends Plugin
 	private void findLinesInScene()
 	{
 		inDeadman = client.getWorldType().stream().anyMatch(x ->
-			x == WorldType.DEADMAN);
+				x == WorldType.DEADMAN);
 		inPvp = client.getWorldType().stream().anyMatch(x ->
-			x == WorldType.PVP);
+				x == WorldType.PVP);
 
 		Rectangle sceneRect = new Rectangle(
-			client.getBaseX() + 1, client.getBaseY() + 1,
-			Constants.SCENE_SIZE - 2, Constants.SCENE_SIZE - 2);
+				client.getBaseX() + 1, client.getBaseY() + 1,
+				Constants.SCENE_SIZE - 2, Constants.SCENE_SIZE - 2);
 
 		// Generate lines for multicombat zones
 		if (config.multicombatZoneVisibility() == ZoneVisibility.HIDE)
@@ -270,7 +238,7 @@ public class MultiIndicatorsPlugin extends Plugin
 				GeneralPath lines = new GeneralPath(MapLocations.getMulticombat(sceneRect, i));
 				lines = Geometry.clipPath(lines, sceneRect);
 				if (config.multicombatZoneVisibility() == ZoneVisibility.SHOW_IN_PVP &&
-					!isInDeadman() && !isInPvp())
+						!isInDeadman() && !isInPvp())
 				{
 					lines = Geometry.clipPath(lines, MapLocations.getRoughWilderness(i));
 				}
@@ -309,29 +277,6 @@ public class MultiIndicatorsPlugin extends Plugin
 				safeZonePath = Geometry.transformPath(safeZonePath, this::transformWorldToLocal);
 			}
 			pvpPathToDisplay[i] = safeZonePath;
-		}
-
-		// Generate wilderness Teleport lines
-		for (int i = 0; i < wildernessTeleportLinesPathToDisplay.length; i++)
-		{
-			currentPlane = i;
-
-			GeneralPath wildernessTeleportLinesPath = null;
-			if (config.showWildernessTeleportLines())
-			{
-				wildernessTeleportLinesPath = new GeneralPath(MapLocations.getWildernessTeleportLines(sceneRect, i));
-			}
-			if (wildernessTeleportLinesPath != null)
-			{
-				wildernessTeleportLinesPath = Geometry.clipPath(wildernessTeleportLinesPath, sceneRect);
-				wildernessTeleportLinesPath = Geometry.splitIntoSegments(wildernessTeleportLinesPath, 1);
-				if (useCollisionLogic())
-				{
-					wildernessTeleportLinesPath = Geometry.filterPath(wildernessTeleportLinesPath, this::collisionFilter);
-				}
-				wildernessTeleportLinesPath = Geometry.transformPath(wildernessTeleportLinesPath, this::transformWorldToLocal);
-			}
-			wildernessTeleportLinesPathToDisplay[i] = wildernessTeleportLinesPath;
 		}
 
 		// Generate wilderness level lines
@@ -373,11 +318,10 @@ public class MultiIndicatorsPlugin extends Plugin
 		}
 
 		if (event.getKey().equals("collisionDetection") ||
-			event.getKey().equals("multicombatZoneVisibility") ||
-			event.getKey().equals("deadmanSafeZones") ||
-			event.getKey().equals("pvpSafeZones") ||
-			event.getKey().equals("wildernessLevelLines") ||
-			event.getKey().equals("wildernessTeleportLines"))
+				event.getKey().equals("multicombatZoneVisibility") ||
+				event.getKey().equals("deadmanSafeZones") ||
+				event.getKey().equals("pvpSafeZones") ||
+				event.getKey().equals("wildernessLevelLines"))
 		{
 			findLinesInScene();
 		}
@@ -391,4 +335,17 @@ public class MultiIndicatorsPlugin extends Plugin
 			findLinesInScene();
 		}
 	}
+
+	/*@Subscribe
+	private void onClientTick(ClientTick event) {
+		if (client.isMirrored() && !mirrorMode) {
+			overlay.setLayer(OverlayLayer.AFTER_MIRROR);
+			overlayManager.remove(overlay);
+			overlayManager.add(overlay);
+			minimapOverlay.setLayer(OverlayLayer.AFTER_MIRROR);
+			overlayManager.remove(minimapOverlay);
+			overlayManager.add(minimapOverlay);
+			mirrorMode = true;
+		}
+	}*/
 }

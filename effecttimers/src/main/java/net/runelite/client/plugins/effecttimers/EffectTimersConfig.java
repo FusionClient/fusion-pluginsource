@@ -24,12 +24,9 @@
  */
 package net.runelite.client.plugins.effecttimers;
 
-import java.awt.Color;
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.Keybind;
-import net.runelite.client.config.Range;
+import net.runelite.client.config.*;
+
+import java.awt.*;
 
 @ConfigGroup("effecttimers")
 public interface EffectTimersConfig extends Config
@@ -82,9 +79,7 @@ public interface EffectTimersConfig extends Config
 		name = "Timer Color",
 		keyName = "timerColor",
 		description = "Color for timers not on cooldown",
-		position = 5,
-		hidden = true,
-		unhide = "setColors"
+		position = 5
 	)
 	default Color timerColor()
 	{
@@ -95,9 +90,7 @@ public interface EffectTimersConfig extends Config
 		name = "Cooldown Color",
 		keyName = "cooldownColor",
 		description = "Color for timers on cooldown",
-		position = 6,
-		hidden = true,
-		unhide = "setColors"
+		position = 6
 	)
 	default Color cooldownColor()
 	{
@@ -145,35 +138,35 @@ public interface EffectTimersConfig extends Config
 	)
 	default boolean sotdTimers()
 	{
-		return true;
+		return false;
 	}
 
 	@ConfigItem(
 		name = "Imbued Heart Timers",
 		keyName = "imbHeartTimers",
-		description = "Should we render staff of the imbued heart timers?",
+		description = "Should we render imbued heart timers?",
 		position = 11
 	)
 	default boolean imbHeartTimers()
 	{
-		return true;
+		return false;
 	}
 
 	@ConfigItem(
 		name = "DFS/DFW Timers",
 		keyName = "dfsTimers",
-		description = "Should we render staff of the dragon fire shield and Dragonfire Ward timers?",
+		description = "Should we render dragon fire shield and Dragonfire Ward timers?",
 		position = 12
 	)
 	default boolean dfsTimers()
 	{
-		return true;
+		return false;
 	}
 
 	@ConfigItem(
 		name = "Ancient Wyvern Shield Timers",
 		keyName = "ancWyvernTimers",
-		description = "Should we render staff of the Ancient Wyvern shield timers?",
+		description = "Should we render Ancient Wyvern shield timers?",
 		position = 13
 	)
 	default boolean ancWyvernTimers()
