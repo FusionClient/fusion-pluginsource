@@ -8,7 +8,6 @@ buildscript {
 
 plugins {
     java
-    checkstyle
 }
 
 apply<BootstrapPlugin>()
@@ -25,7 +24,7 @@ subprojects {
     group = "com.openosrs.externals"
 
     project.extra["PluginProvider"] = "Fusion Plugins"
-    project.extra["ProjectUrl"] = "https://github.com/fusionclient/plugin-release"
+    project.extra["ProjectUrl"] = "https://discord.gg/UBMDQ6WjYq"
     project.extra["PluginLicense"] = "3-Clause BSD License"
 
     repositories {
@@ -72,8 +71,6 @@ subprojects {
     }
 
     apply<JavaPlugin>()
-    apply(plugin = "checkstyle")
-
     dependencies {
         annotationProcessor(Libraries.lombok)
         annotationProcessor(Libraries.pf4j)
@@ -90,13 +87,6 @@ subprojects {
         compileOnly(Libraries.okhttp3)
         compileOnly(Libraries.pf4j)
         compileOnly(Libraries.rxjava)
-    }
-
-    checkstyle {
-        maxWarnings = 0
-        toolVersion = "8.25"
-        isShowViolations = true
-        isIgnoreFailures = false
     }
 
     configure<PublishingExtension> {

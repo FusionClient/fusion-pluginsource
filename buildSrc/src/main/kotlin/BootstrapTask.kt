@@ -26,29 +26,19 @@ open class BootstrapTask : DefaultTask() {
     private fun hash(file: ByteArray): String {
         return MessageDigest.getInstance("SHA-512").digest(file).fold("", { str, it -> str + "%02x".format(it) }).toUpperCase()
     }
-
-    private fun getBootstrap(): JSONArray? {
-        val client = OkHttpClient()
-
-        val url = "https://raw.githubusercontent.com/xKylee/plugins-release/master/plugins.json"
-        val request = Request.Builder()
-                .url(url)
-                .build()
-
-        client.newCall(request).execute().use { response -> return JSONObject("{\"plugins\":${response.body!!.string()}}").getJSONArray("plugins") }
-    }
+    
 
     @TaskAction
     fun boostrap() {
         if (project == project.rootProject) {
-            val bootstrapDir = File("${project.buildDir}/bootstrap")
-            val bootstrapReleaseDir = File("${project.buildDir}/bootstrap/release")
+            val bootstrapDir = File("${project.projectDir}")
+            val bootstrapReleaseDir = File("${project.projectDir}/release/")
 
             bootstrapDir.mkdirs()
             bootstrapReleaseDir.mkdirs()
 
             val plugins = ArrayList<JSONObject>()
-            val baseBootstrap = getBootstrap() ?: throw RuntimeException("Base bootstrap is null!")
+            //val baseBootstrap = getBootstrap() ?: throw RuntimeException("Base bootstrap is null!")
 
             project.subprojects.forEach {
                 if (it.project.properties.containsKey("PluginName") && it.project.properties.containsKey("PluginDescription")) {
@@ -58,38 +48,22 @@ open class BootstrapTask : DefaultTask() {
                     val releases = ArrayList<JsonBuilder>()
 
                     releases.add(JsonBuilder(
-                            "version" to it.project.version,
-                            "requires" to ProjectVersions.apiVersion,
-                            "date" to formatDate(Date()),
-                            "url" to "https://github.com/xKylee/plugins-release/blob/master/release/${it.project.name}-${it.project.version}.jar?raw=true",
-                            "sha512sum" to hash(plugin.readBytes())
+                        "version" to it.project.version,
+                        "requires" to ProjectVersions.apiVersion,
+                        "date" to formatDate(Date()),
+                        //private
+                        "url" to "https://raw.githubusercontent.com/FusionClient/plugin-release/master/release/${it.project.name}-${it.project.version}.jar",
+                        "sha512sum" to hash(plugin.readBytes())
                     ))
 
                     val pluginObject = JsonBuilder(
-                            "name" to it.project.extra.get("PluginName"),
-                            "id" to nameToId(it.project.extra.get("PluginName") as String),
-                            "description" to it.project.extra.get("PluginDescription"),
-                            "provider" to "xKylee",
-                            "projectUrl" to "https://discord.gg/mgXhVDUEUq",
-                            "releases" to releases.toTypedArray()
+                        "name" to it.project.extra.get("PluginName"),
+                        "id" to nameToId(it.project.extra.get("PluginName") as String),
+                        "description" to it.project.extra.get("PluginDescription"),
+                        "provider" to it.project.extra.get("PluginProvider"),
+                        "projectUrl" to it.project.extra.get("ProjectUrl"),
+                        "releases" to releases.toTypedArray()
                     ).jsonObject()
-
-                    for (i in 0 until baseBootstrap.length()) {
-                        val item = baseBootstrap.getJSONObject(i)
-
-                        if (!item.get("id").equals(nameToId(it.project.extra.get("PluginName") as String))) {
-                            continue
-                        }
-
-                        if (it.project.version.toString() in item.getJSONArray("releases").toString()) {
-                            pluginAdded = true
-                            plugins.add(item)
-                            break
-                        }
-
-                        plugins.add(JsonMerger(arrayMergeMode = JsonMerger.ArrayMergeMode.MERGE_ARRAY).merge(item, pluginObject))
-                        pluginAdded = true
-                    }
 
                     if (!pluginAdded)
                     {
