@@ -25,7 +25,7 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "1.0.3"
+version = "1.0.5"
 
 project.extra["PluginName"] = "[F] Volcanic Mine"
 project.extra["PluginDescription"] = "All-in-one plugin for Volcanic Mine. Made by SpoonLite"

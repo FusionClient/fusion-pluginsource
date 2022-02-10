@@ -25,7 +25,7 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "1.0.2"
+version = "1.0.4"
 
 project.extra["PluginName"] = "[F] Cox Prep"
 project.extra["PluginDescription"] = "Cause Can't Count"

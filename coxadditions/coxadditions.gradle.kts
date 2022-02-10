@@ -26,7 +26,7 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "1.0.2"
+version = "1.0.4"
 
 project.extra["PluginName"] = "Cox Additions"
 project.extra["PluginDescription"] = "Additional plugins for the Chambers of Xeric. Made by SpoonLite"
