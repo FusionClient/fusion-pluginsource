@@ -25,7 +25,7 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "1.0.19"
+version = "1.0.20"
 
 project.extra["PluginName"] = "PvP Player Indicators"
 project.extra["PluginDescription"] = "Player indicators with wildy alerts"

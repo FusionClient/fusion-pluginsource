@@ -27,8 +27,8 @@ import ProjectVersions.rlVersion
 
 version = "1.0.13"
 
-project.extra["PluginName"] = "PvP Player Indicators"
-project.extra["PluginDescription"] = "Player indicators with wildy alerts"
+project.extra["PluginName"] = "[F] Thrall Helper"
+project.extra["PluginDescription"] = "Fusion Thrall Helper Plus"
 
 dependencies {
     annotationProcessor(Libraries.lombok)

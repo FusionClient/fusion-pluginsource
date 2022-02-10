@@ -33,11 +33,13 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import org.pf4j.Extension;
 
 import javax.inject.Inject;
 import java.time.Duration;
 import java.time.Instant;
 
+@Extension
 @Slf4j
 @PluginDescriptor(
 		name = "[F] Thrall Helper",
