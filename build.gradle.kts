@@ -13,6 +13,7 @@ plugins {
 
 apply<BootstrapPlugin>()
 apply<VersionPlugin>()
+apply<UpdateVersionsPlugin>()
 
 allprojects {
     group = "com.openosrs"
