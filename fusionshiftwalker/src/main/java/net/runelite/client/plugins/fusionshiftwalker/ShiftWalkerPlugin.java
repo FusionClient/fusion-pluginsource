@@ -14,7 +14,9 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
+import org.pf4j.Extension;
 
+@Extension
 @PluginDescriptor(
 	name = "[F] Shift Click Walk Under",
 	description = "Because niggers like two of everything.",

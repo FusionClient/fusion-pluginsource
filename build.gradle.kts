@@ -8,6 +8,7 @@ buildscript {
 
 plugins {
     java
+    checkstyle
 }
 
 apply<BootstrapPlugin>()
@@ -140,5 +141,10 @@ subprojects {
             into("./build/deps/")
             from(configurations["runtimeClasspath"])
         }
+    }
+}
+    tasks {
+        register<Delete>("bootstrapClean") {
+            delete("release/")
     }
 }
