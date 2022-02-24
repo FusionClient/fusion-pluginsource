@@ -21,7 +21,8 @@ import javax.inject.Inject;
 @PluginDescriptor(
         name = "[F] Cox Prep",
         description = "Cause thinking hard",
-        tags = {"xeric", "prep", "chambers", "cox", "buchu", "golpar", "nox", "seeds"}
+        tags = {"xeric", "prep", "chambers", "cox", "buchu", "golpar", "nox", "seeds"},
+        enabledByDefault = false
 )
 
 public class CoxPrepPlugin extends Plugin{

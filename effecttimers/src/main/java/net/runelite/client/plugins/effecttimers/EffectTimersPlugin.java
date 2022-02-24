@@ -38,10 +38,12 @@ import net.runelite.client.plugins.multiindicators.MapLocations;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.HotkeyListener;
 import org.apache.commons.lang3.ArrayUtils;
+import org.pf4j.Extension;
 
 import javax.inject.Inject;
 import java.util.EnumSet;
 
+@Extension
 @PluginDescriptor(
 	name = "[F] Effect Timers",
 	description = "Effect timer overlay on players",

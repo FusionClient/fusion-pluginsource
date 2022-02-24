@@ -1,7 +1,7 @@
 import ProjectVersions.rlVersion
 
 
-version = "1.0.3"
+version = "2.0.0"
 
 project.extra["PluginName"] = "[F] One Click Thieving"
 project.extra["PluginDescription"] = "QOL for pickpocketing"

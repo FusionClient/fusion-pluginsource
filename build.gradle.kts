@@ -3,6 +3,7 @@ import ProjectVersions.rlVersion
 buildscript {
     repositories {
         gradlePluginPortal()
+        mavenCentral()
     }
 }
 
@@ -113,14 +114,14 @@ subprojects {
             options.encoding = "UTF-8"
         }
 
-        withType<Jar> {
-            doLast {
-                copy {
-                    from("./build/libs/")
-                    into("../release/")
-                }
-            }
-        }
+        /*  withType<Jar> {
+              doLast {
+                  copy {
+                      from("./build/libs/")
+                      into("../release/")
+                  }
+              }
+          } */
 
         withType<AbstractArchiveTask> {
             isPreserveFileTimestamps = false

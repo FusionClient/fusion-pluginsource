@@ -24,7 +24,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "1.0.2"
+version = "2.0.0"
 
 project.extra["PluginName"] = "[F] Hydra"
 project.extra["PluginDescription"] = "Hydra Stoof"

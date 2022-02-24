@@ -5,16 +5,19 @@ import net.runelite.api.Client;
 import net.runelite.api.NPC;
 import net.runelite.api.Projectile;
 import net.runelite.api.events.*;
+import net.runelite.client.Notifier;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import org.pf4j.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
+@Extension
 @PluginDescriptor(name = "[F] Vorkath",
         description = "",
         tags = {"vorkath", "vork"},
@@ -25,6 +28,9 @@ public class VorkathPlugin extends Plugin {
 
     @Inject
     private Client client;
+
+    @Inject
+    private Notifier notifier;
 
     @Inject
     OverlayManager overlayManager;
@@ -127,6 +133,11 @@ public class VorkathPlugin extends Plugin {
             }
     }
 
+    @Subscribe
+    private void onProjectileSpawned(ProjectileSpawned event) {
+        int projectileId = event.getProjectile().getId();
+        if ((projectileId == 1471 || projectileId ==1481) && config.afkNotifier()) {notifier.notify("Vorkath");}
+    }
     @Subscribe
     public void onAnimationChanged(AnimationChanged e) {
         if (e.getActor() == this.vorkathNpc) {

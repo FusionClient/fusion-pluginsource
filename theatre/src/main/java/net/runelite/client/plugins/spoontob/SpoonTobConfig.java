@@ -1,5 +1,8 @@
 package net.runelite.client.plugins.spoontob;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import net.runelite.client.config.*;
 
 import java.awt.*;
@@ -13,6 +16,7 @@ public interface SpoonTobConfig extends Config {
             closedByDefault = true
     )
     String maiden = "maiden";
+
     @ConfigSection(
             name = "Bloat",
             description = "Bloat settings",
@@ -20,6 +24,7 @@ public interface SpoonTobConfig extends Config {
             closedByDefault = true
     )
     String bloat = "bloat";
+
     @ConfigSection(
             name = "Nylocas",
             description = "Nylocas settings",
@@ -27,6 +32,7 @@ public interface SpoonTobConfig extends Config {
             closedByDefault = true
     )
     String nylocas = "nylocas";
+
     @ConfigSection(
             name = "Sotetseg",
             description = "Sotetseg settings",
@@ -34,6 +40,7 @@ public interface SpoonTobConfig extends Config {
             closedByDefault = true
     )
     String sotetseg = "sotetseg";
+
     @ConfigSection(
             name = "Xarpus",
             description = "Xarpus settings",
@@ -41,6 +48,7 @@ public interface SpoonTobConfig extends Config {
             closedByDefault = true
     )
     String xarpus = "xarpus";
+
     @ConfigSection(
             name = "Verzik",
             description = "Verzik settings",
@@ -48,6 +56,7 @@ public interface SpoonTobConfig extends Config {
             closedByDefault = true
     )
     String verzik = "verzik";
+
     @ConfigSection(
             name = "Misc",
             description = "Misc settings",
@@ -55,6 +64,14 @@ public interface SpoonTobConfig extends Config {
             closedByDefault = true
     )
     String misc = "misc";
+
+    @ConfigSection(
+            name = "Font Settings",
+            description = "Font settings",
+            position = 8,
+            closedByDefault = true
+    )
+    String font = "font";
 
     //------------------------------------------------------------//
     // Maiden
@@ -515,6 +532,17 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
+            position = 1,
+            keyName = "manualCast",
+            name = "Wheelchair - Manual Cast Wands",
+            description = "Only lets you manually cast spells on all nylos when a wand or staff is equipped. Ignores tridents/sangs",
+            section = nylocas
+    )
+    default boolean manualCast() {
+        return false;
+    }
+
+    @ConfigItem(
             position = 2,
             keyName = "showPhaseChange",
             name = "Show Boss Phase Change",
@@ -657,9 +685,7 @@ public interface SpoonTobConfig extends Config {
             description = "Highlight nylocas that are aggressive.",
             section = nylocas
     )
-    default boolean nyloAggressiveOverlay() {
-        return false;
-    }
+    default aggroStyle nyloAggressiveOverlay() { return aggroStyle.TILE; }
 
     @ConfigItem(
             position = 15,
@@ -834,6 +860,17 @@ public interface SpoonTobConfig extends Config {
 
     @ConfigItem(
             position = 6,
+            keyName = "deathTicksOnPlayer",
+            name = "Death Ball Ticks on Player",
+            description = "Displays the death ball ticks on the targeted player instead of on the death ball",
+            section = sotetseg
+    )
+    default boolean deathTicksOnPlayer() {
+        return false;
+    }
+
+    @ConfigItem(
+            position = 7,
             keyName = "SotetsegAttacksSounds",
             name = "Sotetseg Nuke Sound",
             description = "Ear rape.",
@@ -845,7 +882,7 @@ public interface SpoonTobConfig extends Config {
 
     @Range(max = 100)
     @ConfigItem(
-            position = 7,
+            position = 8,
             keyName = "SotetsegAttacksSoundsVolume",
             name = "Nuke Volume",
             description = "Set this to 100 or you're a pussy.",
@@ -858,7 +895,7 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 8,
+            position = 9,
             keyName = "displayDeathBall",
             name = "Show Death Ball Target",
             description = "Shows who has the death ball",
@@ -869,7 +906,7 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 9,
+            position = 10,
             keyName = "displayDeathBallColor",
             name = "Death Ball Target Color",
             description = "Sets color of the death ball target tile",
@@ -883,7 +920,7 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 10,
+            position = 11,
             keyName = "deathballInfobox",
             name = "Attacks Until Death Ball",
             description = "Shows an infobox with the attacks left until death ball",
@@ -894,7 +931,7 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 11,
+            position = 12,
             keyName = "deathballSingleLine",
             name = "Single Line Text",
             description = "Makes the attacks until deathball and ticks until attack a single line",
@@ -1493,17 +1530,6 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 3,
-            keyName = "fontStyle",
-            name = "Runelite Font",
-            description = "Replaces the default font with whatever you have the dynamic font set to",
-            section = misc
-    )
-    default boolean fontStyle() {
-        return false;
-    }
-
-    @ConfigItem(
             position = 4,
             keyName = "redsTL",
             name = "Red Crabs True Tile",
@@ -1726,6 +1752,172 @@ public interface SpoonTobConfig extends Config {
     void setHighlightRangeNylo(boolean var1);
 
     //------------------------------------------------------------//
+    // Font
+    //------------------------------------------------------------//
+    @ConfigItem(
+            position = 0,
+            keyName = "fontStyle",
+            name = "Runelite Font",
+            description = "Replaces the default font with whatever you have the dynamic font set to",
+            section = font
+    )
+    default boolean fontStyle() {
+        return false;
+    }
+
+    @ConfigItem(
+            position = 1,
+            keyName = "resizeFont",
+            name = "Allow Resizing Font",
+            description = "Lets you resize font for overlays in Tob. Resizes ALL overlays when turned on",
+            section = font
+    )
+    default boolean resizeFont() {
+        return false;
+    }
+
+    @Range(max = 30)
+    @ConfigItem(
+            position = 2,
+            keyName = "tobFontSize",
+            name = "Overlay Font Size",
+            description = "Sets the font size for all Tob overlays. Must have 'Allow resizing font' on",
+            section = font
+    )
+    default int tobFontSize()
+    {
+        return 12;
+    }
+
+    @ConfigItem(
+            position = 3,
+            keyName = "fontWeight",
+            name = "Font Weight",
+            description = "Bold/Italics/Plain.",
+            section = font
+    )
+    default FontStyle fontWeight()
+    {
+        return FontStyle.BOLD;
+    }
+
+    @ConfigItem(
+            position = 4,
+            keyName = "deathballSize",
+            name = "Death Ball Font Size",
+            description = "Font size for the death ball ticks - must have on player selected",
+            section = font,
+            hidden = true,
+            unhide = "deathTicksOnPlayer"
+    )
+    default int deathballSize() {return 14;}
+
+    @Range(min = -60)
+    @ConfigItem(
+            position = 5,
+            keyName = "deathballOffset",
+            name = "Death Ball Font Offset",
+            description = "Offset for the death ball ticks - must have on player selected",
+            section = font,
+            hidden = true,
+            unhide = "deathTicksOnPlayer"
+    )
+    default int deathballOffset() {return 0;}
+
+    @ConfigItem(
+            position = 6,
+            keyName = "yellowsSize",
+            name = "Yellows Font Size",
+            description = "Font size for the yellows ticks - must have on player selected",
+            section = font,
+            hidden = true,
+            unhide = "yellowTicksOnPlayer"
+    )
+    default int yellowsSize() {return 14;}
+
+    @Range(min = -60)
+    @ConfigItem(
+            position = 7,
+            keyName = "yellowsOffset",
+            name = "Yellows Font Offset",
+            description = "Offset for the yellows ticks - must have on player selected",
+            section = font,
+            hidden = true,
+            unhide = "yellowTicksOnPlayer"
+    )
+    default int yellowsOffset() {return 0;}
+
+    @ConfigItem(
+            position = 8,
+            keyName = "zapSize",
+            name = "Zap Font Size",
+            description = "Font size for the zap ticks - must have on player selected",
+            section = font,
+            hidden = true,
+            unhide = "lightningAttackTick"
+    )
+    default int zapSize() {return 14;}
+
+    @Range(min = -60)
+    @ConfigItem(
+            position = 9,
+            keyName = "zapOffset",
+            name = "Zap Font Offset",
+            description = "Offset for the zap ticks - must have on player selected",
+            section = font,
+            hidden = true,
+            unhide = "lightningAttackTick"
+    )
+    default int zapOffset() {return 0;}
+
+    @ConfigItem(
+            position = 10,
+            keyName = "greenBallSize",
+            name = "Green Ball Font Size",
+            description = "Font size for the green ball ticks - must have on player selected",
+            section = font,
+            hidden = true,
+            unhide = "displayGreenBallTicks"
+    )
+    default int greenBallSize() {return 15;}
+
+    @Range(min = -60)
+    @ConfigItem(
+            position = 11,
+            keyName = "greenBallOffset",
+            name = "Green Ball Font Offset",
+            description = "Offset for the green ball ticks - must have on player selected",
+            section = font,
+            hidden = true,
+            unhide = "displayGreenBallTicks"
+    )
+    default int greenBallOffset() {return 0;}
+
+    @ConfigItem(
+            position = 12,
+            keyName = "situationalTicksSize",
+            name = "Sit. Ticks Font Size",
+            description = "Font size for the situational ticks - must have on player selected",
+            section = font,
+            hidden = true,
+            unhide = "situationalTicks"
+    )
+    default int situationalTicksSize() {return 14;}
+
+    @Range(min = -60)
+    @ConfigItem(
+            position = 13,
+            keyName = "situationalTicksOffset",
+            name = "Sit. Ticks Font Offset",
+            description = "Offset for the situational ticks - must have on player selected",
+            section = font,
+            hidden = true,
+            unhide = "situationalTicks"
+    )
+    default int situationalTicksOffset() {return 60;}
+
+
+    //------------------------------------------------------------//
     // Maiden enums
     //------------------------------------------------------------//
     enum maidenBloodSplatMode {
@@ -1812,6 +2004,10 @@ public interface SpoonTobConfig extends Config {
         OFF, WAVES, BOSS, BOTH
     }
 
+    enum nyloBossPhaseChange {
+        OFF, BOSS, BOTH
+    }
+
     enum nyloExplosionType {
         TILE, EXPLOSION
     }
@@ -1824,8 +2020,8 @@ public interface SpoonTobConfig extends Config {
         COUNTUP, COUNTDOWN
     }
 
-    enum nyloBossPhaseChange {
-        OFF, BOSS, BOTH
+    enum aggroStyle {
+        OFF, HULL, TILE
     }
 
     enum nyloSplitsMessage {
@@ -1950,5 +2146,26 @@ public interface SpoonTobConfig extends Config {
 
     enum raveNadoMode {
         OFF, FlOW, RAVE
+    }
+
+    //------------------------------------------------------------//
+    // Font enums
+    //------------------------------------------------------------//
+    @Getter(AccessLevel.PACKAGE)
+    @AllArgsConstructor
+    enum FontStyle
+    {
+        BOLD("Bold", Font.BOLD),
+        ITALIC("Italic", Font.ITALIC),
+        PLAIN("Plain", Font.PLAIN);
+
+        private final String name;
+        private final int font;
+
+        @Override
+        public String toString()
+        {
+            return getName();
+        }
     }
 }

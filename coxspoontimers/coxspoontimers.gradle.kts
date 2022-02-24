@@ -25,10 +25,10 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "1.0.1"
+version = "2.0.0"
 
 project.extra["PluginName"] = "[F] Cox Timers"
-project.extra["PluginDescription"] = "Modified De0's cox timers. Current room time display and detailed splits.<br> Made by SpoonLite"
+project.extra["PluginDescription"] = "Modified De0's cox timers. Current room time display and detailed splits. Made by SpoonLite"
 
 dependencies {
     annotationProcessor(Libraries.lombok)

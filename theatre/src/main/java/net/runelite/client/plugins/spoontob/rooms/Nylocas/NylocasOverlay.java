@@ -1,6 +1,5 @@
 package net.runelite.client.plugins.spoontob.rooms.Nylocas;
 
-import com.google.common.base.Strings;
 import net.runelite.api.NPC;
 import net.runelite.api.Perspective;
 import net.runelite.api.Player;
@@ -10,6 +9,8 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.spoontob.RoomOverlay;
 import net.runelite.client.plugins.spoontob.SpoonTobConfig;
 import net.runelite.client.plugins.spoontob.SpoonTobPlugin;
+import net.runelite.client.ui.FontManager;
+import net.runelite.client.ui.overlay.OverlayUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -60,16 +61,16 @@ public class NylocasOverlay extends RoomOverlay {
                             if (config.fontStyle()) {
                                 renderTextLocation(graphics, healthStr, c, canvasPoint);
                             } else {
-                                renderSteroidsTextLocation(graphics, healthStr, 13, 1, c, canvasPoint);
+                                renderResizeTextLocation(graphics, healthStr, 13, Font.BOLD, c, canvasPoint);
                             }
                         }
                     }
                 }
 
                 if (config.showNylocasExplosions() != SpoonTobConfig.ExplosionWarning.OFF || config.getHighlightMageNylo() || config.getHighlightMeleeNylo()
-                        || config.getHighlightRangeNylo() || config.nyloAggressiveOverlay()) {
+                        || config.getHighlightRangeNylo() || config.nyloAggressiveOverlay() != SpoonTobConfig.aggroStyle.OFF) {
                     HashMap<NPC, Integer> npcMap = nylocas.getNylocasNpcs();
-				    int meleeIndex = 0;
+                    int meleeIndex = 0;
                     int rangeIndex = 0;
                     int mageIndex = 0;
 
@@ -78,9 +79,21 @@ public class NylocasOverlay extends RoomOverlay {
                         LocalPoint lp = npc.getLocalLocation();
 
                         if(!npc.isDead()){
-                            if (config.nyloAggressiveOverlay() && nylocas.getAggressiveNylocas().contains(npc) && lp != null) {
-                                Polygon poly = getCanvasTileAreaPoly(client, lp, npc.getComposition().getSize(), -25);
-                                renderPoly(graphics, Color.RED, poly, config.nyloTileWidth());
+                            if (nylocas.getAggressiveNylocas().contains(npc) && lp != null) {
+                                if (config.nyloAggressiveOverlay() == SpoonTobConfig.aggroStyle.TILE) {
+                                    Polygon poly = getCanvasTileAreaPoly(client, lp, npc.getComposition().getSize(), -25);
+                                    renderPoly(graphics, Color.RED, poly, config.nyloTileWidth());
+                                } else if (config.nyloAggressiveOverlay() == SpoonTobConfig.aggroStyle.HULL) {
+                                    Shape objectClickbox = npc.getConvexHull();
+                                    if (objectClickbox != null) {
+                                        Color color = Color.RED;
+                                        graphics.setColor(color);
+                                        graphics.setStroke(new BasicStroke((float)config.nyloTileWidth()));
+                                        graphics.draw(objectClickbox);
+                                        graphics.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 0));
+                                        graphics.fill(objectClickbox);
+                                    }
+                                }
                             }
 
                             int ticksLeft = npcMap.get(npc);
@@ -108,13 +121,13 @@ public class NylocasOverlay extends RoomOverlay {
                                             if (config.fontStyle()){
                                                 renderTextLocation(graphics, String.valueOf(ticksAlive), Color.RED, textLocation);
                                             }else {
-                                                renderSteroidsTextLocation(graphics, String.valueOf(ticksAlive), 13, 1, Color.RED, textLocation);
+                                                renderSteroidsTextLocation(graphics, String.valueOf(ticksAlive), 13, Font.BOLD, Color.RED, textLocation);
                                             }
                                         } else {
                                             if (config.fontStyle()){
                                                 renderTextLocation(graphics, String.valueOf(ticksAlive), Color.WHITE, textLocation);
                                             } else {
-                                                renderSteroidsTextLocation(graphics, String.valueOf(ticksAlive), 13, 1, Color.WHITE, textLocation);
+                                                renderSteroidsTextLocation(graphics, String.valueOf(ticksAlive), 13, Font.BOLD, Color.WHITE, textLocation);
                                             }
                                         }
                                     }
@@ -176,11 +189,11 @@ public class NylocasOverlay extends RoomOverlay {
                             renderTextLocation(graphics, text, color, Perspective.getCanvasTextLocation(client, graphics, southLp, text, 0));
                     } else {
                         if (eastLp != null)
-                            renderSteroidsTextLocation(graphics, text, 14, 1, color, Perspective.getCanvasTextLocation(client, graphics, eastLp, text, 0));
+                            renderResizeTextLocation(graphics, text, 14, 1, color, Perspective.getCanvasTextLocation(client, graphics, eastLp, text, 0));
                         if (westLp != null)
-                            renderSteroidsTextLocation(graphics, text, 14, 1, color, Perspective.getCanvasTextLocation(client, graphics, westLp, text, 0));
+                            renderResizeTextLocation(graphics, text, 14, 1, color, Perspective.getCanvasTextLocation(client, graphics, westLp, text, 0));
                         if (southLp != null)
-                            renderSteroidsTextLocation(graphics, text, 14, 1, color, Perspective.getCanvasTextLocation(client, graphics, southLp, text, 0));
+                            renderResizeTextLocation(graphics, text, 14, 1, color, Perspective.getCanvasTextLocation(client, graphics, southLp, text, 0));
                     }
                 }
             }
@@ -198,7 +211,7 @@ public class NylocasOverlay extends RoomOverlay {
                         if (config.fontStyle()) {
                             renderTextLocation(graphics, Integer.toString(ticks), Color.WHITE, textLocation);
                         } else {
-                            renderTextLocation(graphics, textLocation, Integer.toString(ticks), Color.WHITE, 13, 1);
+                            renderBigSplitsTextLocation(graphics, Integer.toString(ticks), textLocation);
                         }
                     }
                 });
@@ -209,41 +222,26 @@ public class NylocasOverlay extends RoomOverlay {
     }
 
     public void drawNylocas(Graphics2D graphics) {
-		NPC npc = null;
-		if(nylocas.minibossAlive && nylocas.nyloMiniboss != null && config.showPhaseChange() == SpoonTobConfig.nyloBossPhaseChange.BOTH){
-			npc = nylocas.nyloMiniboss;
-		}else if(nylocas.getNylocasBoss() != null){
-			npc = nylocas.getNylocasBoss();
-		}
-		
-        if (npc != null){
-			LocalPoint lp = npc.getLocalLocation();
-			if (lp != null) {
-				String str = Integer.toString(nylocas.getBossChangeTicks());
-				Point loc = Perspective.getCanvasTextLocation(client, graphics, lp, str, 0);
-				if (loc != null) {
-					if (config.fontStyle()){
-						renderTextLocation(graphics, str, Color.WHITE, loc);
-					} else {
-						renderSteroidsTextLocation(graphics, str, 14, 1, Color.WHITE, loc);
-					}
-				}
-			}
-		}
-    }
+        NPC npc = null;
+        if(nylocas.minibossAlive && nylocas.nyloMiniboss != null && config.showPhaseChange() == SpoonTobConfig.nyloBossPhaseChange.BOTH){
+            npc = nylocas.nyloMiniboss;
+        }else if(nylocas.getNylocasBoss() != null){
+            npc = nylocas.getNylocasBoss();
+        }
 
-    protected void renderTextLocation(Graphics2D graphics, @Nullable Point txtLoc, @Nullable String text, @Nonnull Color color , int fontSize, int fontStyle) {
-        if (txtLoc != null && !Strings.isNullOrEmpty(text)) {
-            graphics.setFont(new Font("Arial", fontStyle, fontSize));
-            int x = txtLoc.getX();
-            int y = txtLoc.getY();
-            graphics.setColor(Color.BLACK);
-            graphics.drawString(text, x, y + 1);
-            graphics.drawString(text, x, y - 1);
-            graphics.drawString(text, x + 1, y);
-            graphics.drawString(text, x - 1, y);
-            graphics.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue()));
-            graphics.drawString(text, x, y);
+        if (npc != null){
+            LocalPoint lp = npc.getLocalLocation();
+            if (lp != null) {
+                String str = Integer.toString(nylocas.getBossChangeTicks());
+                Point loc = Perspective.getCanvasTextLocation(client, graphics, lp, str, 0);
+                if (loc != null) {
+                    if (config.fontStyle()){
+                        renderTextLocation(graphics, str, Color.WHITE, loc);
+                    } else {
+                        renderResizeTextLocation(graphics, str, 14, Font.BOLD, Color.WHITE, loc);
+                    }
+                }
+            }
         }
     }
 
@@ -254,6 +252,16 @@ public class NylocasOverlay extends RoomOverlay {
             graphics.draw(polygon);
             graphics.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 0));
             graphics.fill(polygon);
+        }
+    }
+
+    protected void renderBigSplitsTextLocation(Graphics2D graphics, String txtString, Point canvasPoint) {
+        graphics.setFont(new Font(FontManager.getRunescapeSmallFont().toString(), Font.BOLD, 13));
+        if (canvasPoint != null) {
+            Point canvasCenterPoint = new Point(canvasPoint.getX(), canvasPoint.getY());
+            Point canvasCenterPointShadow = new Point(canvasPoint.getX() + 1, canvasPoint.getY() + 1);
+            OverlayUtil.renderTextLocation(graphics, canvasCenterPointShadow, txtString, Color.BLACK);
+            OverlayUtil.renderTextLocation(graphics, canvasCenterPoint, txtString, Color.WHITE);
         }
     }
 }
