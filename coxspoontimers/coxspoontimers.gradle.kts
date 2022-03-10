@@ -25,7 +25,7 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "2.0.0"
+version = "3.0.0"
 
 project.extra["PluginName"] = "[F] Cox Timers"
 project.extra["PluginDescription"] = "Modified De0's cox timers. Current room time display and detailed splits. Made by SpoonLite"

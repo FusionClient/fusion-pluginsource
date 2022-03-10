@@ -13,7 +13,9 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.overlay.OverlayManager;
+import org.pf4j.Extension;
 
+@Extension
 @PluginDescriptor(
 	name = "[F] Hop Timer",
 	description = "Shows how long before you are out of combat and can hop worlds",

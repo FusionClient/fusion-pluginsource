@@ -1,8 +1,7 @@
 import ProjectVersions.rlVersion
 
 /*
- * Copyright (c) 2021 SpoonLite
- * Copyright (c) 2022 Fusion
+ * Copyright (c) 2019 Owain van Brakel <https://github.com/Owain94>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +25,11 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "3.0.0"
+version = "2.0.0"
 
-project.extra["PluginName"] = "Spawn Predictor"
-project.extra["PluginDescription"] = "Shows fight cave spawn locations. Made by Tyler"
+project.extra["PluginName"] = "AutoLogHop"
+project.extra["PluginDescription"] = "Automatically Logout / Hop / Teleport"
+
 
 dependencies {
     annotationProcessor(Libraries.lombok)
@@ -50,11 +50,11 @@ tasks {
     jar {
         manifest {
             attributes(mapOf(
-                    "Plugin-Version" to project.version,
-                    "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
-                    "Plugin-Provider" to project.extra["PluginProvider"],
-                    "Plugin-Description" to project.extra["PluginDescription"],
-                    "Plugin-License" to project.extra["PluginLicense"]
+                "Plugin-Version" to project.version,
+                "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
+                "Plugin-Provider" to project.extra["PluginProvider"],
+                "Plugin-Description" to project.extra["PluginDescription"],
+                "Plugin-License" to project.extra["PluginLicense"]
             ))
         }
     }

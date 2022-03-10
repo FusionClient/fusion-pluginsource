@@ -30,6 +30,7 @@ rootProject.name = "Fusion Plugins"
 //------------------------------------------------------------//
 
 include(":aoe")
+include(":autologhop")
 include(":autohop")
 include(":blackjack")
 include(":coxprep")
@@ -57,6 +58,7 @@ include(":hallowedsepulchre")
 include(":hydra")
 include(":hideunder")
 include(":hoptimer")
+//include(":killswitch")
 include(":lowmemorybloat")
 //include(":multiindicators")
 include(":neverlog")

@@ -26,7 +26,7 @@ import ProjectVersions.rlVersion
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-version = "2.0.0"
+version = "3.0.0"
 
 project.extra["PluginName"] = "[F] Low Detail"
 project.extra["PluginDescription"] = "Turns off at bloat"

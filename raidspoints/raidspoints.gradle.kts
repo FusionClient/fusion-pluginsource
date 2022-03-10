@@ -25,7 +25,7 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "2.0.0"
+version = "3.0.0"
 
 project.extra["PluginName"] = "Raids Points Panel"
 project.extra["PluginDescription"] = "Panel with additional info for previous and current raids"
