@@ -1,14 +1,15 @@
 package net.runelite.client.plugins.spoonezswaps;
 
 import com.google.inject.Inject;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.PanelComponent;
-
-import java.awt.*;
 
 public class SkillingOverlay extends Overlay {
     private final Client client;

@@ -1,7 +1,6 @@
 package net.runelite.client.plugins.spoonezswaps.config;
 
 import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.List;
 

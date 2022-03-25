@@ -161,10 +161,10 @@ public class MinionOverlay extends Overlay {
         int textWidth = graphics.getFontMetrics().stringWidth(timeLeftStr);
         int textHeight = graphics.getFontMetrics().getAscent();
 
-        Point canvasPoint = Perspective.localToCanvas(this.client, centerLp, respawnLocation.getPlane());
+        net.runelite.api.Point canvasPoint = Perspective.localToCanvas(this.client, centerLp, respawnLocation.getPlane());
 
         if (canvasPoint != null) {
-            Point canvasCenterPoint = new Point(canvasPoint.getX() - textWidth / 2, canvasPoint.getY() + textHeight / 2);
+            net.runelite.api.Point canvasCenterPoint = new Point(canvasPoint.getX() - textWidth / 2, canvasPoint.getY() + textHeight / 2);
             OverlayUtil.renderTextLocation(graphics, canvasCenterPoint, timeLeftStr, TEXT_COLOR);
         }
 
