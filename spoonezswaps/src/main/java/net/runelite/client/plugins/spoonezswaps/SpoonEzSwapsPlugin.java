@@ -26,18 +26,22 @@ import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.plugins.menuentryswapper.Swap;
 import net.runelite.client.plugins.spoonezswaps.config.*;
 import net.runelite.client.plugins.spoonezswaps.util.CustomSwaps;
+import net.runelite.client.plugins.spoonezswaps.util.DelayUtils;
 import net.runelite.client.plugins.spoonezswaps.util.MinionData;
+import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.overlay.OverlayManager;
 import org.apache.commons.lang3.ObjectUtils;
 import org.pf4j.Extension;
 
 import javax.inject.Inject;
 import javax.sound.sampled.*;
+import java.awt.event.KeyEvent;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.time.Instant;
 import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -49,7 +53,7 @@ import static com.google.common.base.Predicates.equalTo;
 		name = "[F] Ez Swaps",
 		enabledByDefault = false,
 		description = "A shit ton of menu entry swapper stuff.",
-		tags = {"pickpocket", "equipped items", "inventory", "items", "equip", "construction", "spoon", "ez", "skilling", "pvm", "custom", "swapper"}
+		tags = {"pickpocket", "equipped items", "inventory", "items", "equip", "construction", "ez", "skilling", "pvm", "custom", "swapper"}
 )
 public class SpoonEzSwapsPlugin extends Plugin {
 	@Inject
@@ -90,6 +94,12 @@ public class SpoonEzSwapsPlugin extends Plugin {
 
 	@Inject
 	private OverlayManager overlayManager;
+
+	@Inject
+	private DelayUtils delayUtils;
+
+	@Inject
+	private ClientUI clientUI;
 
 	private static <T extends Comparable<? super T>> void sortedInsert(List<T> list, T value) // NOPMD: UnusedPrivateMethod: false positive
 	{
@@ -156,7 +166,7 @@ public class SpoonEzSwapsPlugin extends Plugin {
 
 	//Minion respawn timers
 	@Getter
-	private final List<MinionData> trackedMinions = new ArrayList<>();
+	private List<MinionData> trackedMinions = new ArrayList<>();
 
 	@Getter
 	private Instant lastTickUpdate;
@@ -167,6 +177,8 @@ public class SpoonEzSwapsPlugin extends Plugin {
 	protected int totalAmuletCount;
 	protected int cookedPieCount;
 	protected int totalPieCount;
+
+	public int vetionHarmAttackedTick = -1;
 
 	@Provides
 	SpoonEzSwapsConfig provideConfig(ConfigManager configManager)
@@ -210,6 +222,7 @@ public class SpoonEzSwapsPlugin extends Plugin {
 		clip = null;
 		weaponStyle = null;
 		customDropList.clear();
+		vetionHarmAttackedTick = -1;
 	}
 
 	public Swap swap(String option, String swappedOption, Supplier<Boolean> enabled)
@@ -224,7 +237,7 @@ public class SpoonEzSwapsPlugin extends Plugin {
 
 	public Swap swap(String option, Predicate<String> targetPredicate, String swappedOption, Supplier<Boolean> enabled)
 	{
-		Swap swap = new Swap(o -> true, targetPredicate, swappedOption, enabled, true);
+		Swap swap = new Swap(alwaysTrue(), targetPredicate, swappedOption, enabled, true);
 		swaps.put(option, swap);
 		return swap;
 	}
@@ -232,7 +245,7 @@ public class SpoonEzSwapsPlugin extends Plugin {
 	public Swap swapContains(String option, Predicate<String> targetPredicate, String swappedOption,
 							 Supplier<Boolean> enabled)
 	{
-		Swap swap = new Swap(o -> true, targetPredicate, swappedOption, enabled, false);
+		Swap swap = new Swap(alwaysTrue(), targetPredicate, swappedOption, enabled, false);
 		swaps.put(option, swap);
 		return swap;
 	}
@@ -280,6 +293,16 @@ public class SpoonEzSwapsPlugin extends Plugin {
 				skipTickCheck = true;
 				weaponStyle = newStyle;
 			}
+		} else if (event.getMenuAction() == MenuAction.NPC_SECOND_OPTION && vetionHarmAttackedTick != -1 && client.getTickCount() != vetionHarmAttackedTick + 1 && config.vetionBoosting()
+				&& event.getMenuTarget().contains("Vet'ion") && event.getMenuOption().contains("Attack")) {
+			event.consume();
+		}
+	}
+
+	@Subscribe
+	public void onAnimationChanged(AnimationChanged event) {
+		if (event.getActor() instanceof Player && config.vetionBoosting() && event.getActor().getAnimation() == 1162 && client.getVar(Varbits.IN_WILDERNESS) == 1){
+			vetionHarmAttackedTick = client.getTickCount();
 		}
 	}
 
@@ -627,37 +650,19 @@ public class SpoonEzSwapsPlugin extends Plugin {
 
 		if (config.hideEmpty() && option.contains("empty")) {
 			return potOptions;
-		}
-
-		if (config.swapHerblore() && option.contains("drink")) {
+		} else if (config.swapHerblore() && option.contains("drink")) {
 			return potOptions;
-		}
-
-		if (config.hideTradeWith() && option.contains("trade with")) {
+		} else if (config.hideTradeWith() && option.contains("trade with")) {
 			return false;
-		}
-
-		if (config.hideDestroy() && option.contains("destroy") && target.contains("rune pouch")) {
+		} else if (config.hideDestroy() && option.contains("destroy") && target.contains("rune pouch")) {
 			return false;
-		}
-
-		if (config.hideExamine() && option.contains("examine")) {
+		} else if (config.hideExamine() && option.contains("examine")) {
 			return false;
-		}
-
-		if (config.hideReport() && option.contains("report")) {
+		} else if (config.hideReport() && option.contains("report")) {
 			return false;
-		}
-
-		/*if (config.hideCancel() && option.contains("cancel")) {
+		} else if (config.hideRestoreMutagen() && (target.contains("tanzanite helm") || target.contains("magma helm")) && option.contains("restore")) {
 			return false;
-		}*/
-
-		if (config.hideRestoreMutagen() && (target.contains("tanzanite helm") || target.contains("magma helm")) && option.contains("restore")) {
-			return false;
-		}
-
-		if (config.hideLootImpJars() && target.contains("impling") && option.contains("loot")) {
+		} else if (config.hideLootImpJars() && target.contains("impling") && option.contains("loot")) {
 			if (client.getItemContainer(InventoryID.BANK) != null) {
 				bankItemNames = new ArrayList<>();
 				for (Item i : Objects.requireNonNull(client.getItemContainer(InventoryID.BANK)).getItems()) {
@@ -720,48 +725,33 @@ public class SpoonEzSwapsPlugin extends Plugin {
 					}
 					break;
 			}
-		}
-
-		if (config.hideCastRaids() && (client.getVar(Varbits.IN_RAID) == 1 || client.getVar(Varbits.THEATRE_OF_BLOOD) == 2)) {
-			if (client.getSpellSelected() && !hideCastIgnoredSpells.contains(Text.standardize(client.getSelectedSpellName())) && entry.getType().getId() == MenuAction.SPELL_CAST_ON_PLAYER.getId()) {
-				return false;
-			}
-		}
-
-		if (config.hideCastThralls() && target.contains("thrall") && entry.getType().getId() == MenuAction.SPELL_CAST_ON_NPC.getId()) {
+		} else if (config.hideCastRaids() && (client.getVar(Varbits.IN_RAID) == 1 || client.getVar(Varbits.THEATRE_OF_BLOOD) == 2)
+				&& (!client.getSpellSelected() || hideCastIgnoredSpells.contains(Text.standardize(client.getSelectedSpellName()))
+				|| entry.getType().getId() != MenuAction.SPELL_CAST_ON_PLAYER.getId())) {
+			return true;
+		} else if (config.hideCastThralls() && target.contains("thrall") && entry.getType().getId() == MenuAction.SPELL_CAST_ON_NPC.getId()) {
 			return false;
-		}
-
-		if (config.removeSireSpawns()) {
-			String sireTarget = Text.removeTags(entry.getTarget()).toLowerCase();
-			if (sireTarget.contains("spawn  (level-60)") || sireTarget.contains("scion  (level-100)")) {
-				for (NPC n : client.getNpcs()) {
-					if (SIRE_IDS.contains(n.getId()) && !n.isDead()) {
-						entry.setDeprioritized(true);
-					}
+		} else if (config.removeSireSpawns() && (Text.removeTags(entry.getTarget()).toLowerCase().contains("spawn  (level-60)")
+				|| Text.removeTags(entry.getTarget()).toLowerCase().contains("scion  (level-100)"))) {
+			for (NPC n : client.getNpcs()) {
+				if (SIRE_IDS.contains(n.getId()) && !n.isDead()) {
+					entry.setDeprioritized(true);
+					return true;
 				}
 			}
-		}
-
-		if (config.hideAttackBandos() || config.hideAttackBandosMinions() || config.hideAttackSara() || config.hideAttackKree()
-				|| config.hideAttackSaraMinions() || config.hideAttackZammy() || config.hideAttackZammyMinions() || config.hideAttackArmaMinions())
-		{
-			if (isInGodWars() || client.isInInstancedRegion())
-			{
+		} else if (config.hideAttackBandos() || config.hideAttackBandosMinions() || config.hideAttackSara() || config.hideAttackKree()
+				|| config.hideAttackSaraMinions() || config.hideAttackZammy() || config.hideAttackZammyMinions() || config.hideAttackArmaMinions()) {
+			if (isInGodWars()) {
 				boolean bossAlive = false;
 				boolean minionsAlive = false;
-				for (NPC npc : client.getNpcs())
-				{
-					if (npc != null && npc.getName() != null && npc.getHealthRatio() != 0)
-					{
+				for (NPC npc : client.getNpcs()) {
+					if (npc != null && npc.getName() != null && npc.getHealthRatio() != 0) {
 						String npcName = Text.standardize(npc.getName());
 						if ((npcName.contains(BANDOS_BOSS) || npcName.contains(SARA_BOSS) || npcName.contains(ZAMMY_BOSS) || npcName.contains(ARMA_BOSS))
-								&& npc.getComposition().getSize() > 1)
-						{
+								&& npc.getComposition().getSize() > 1) {
 							bossAlive = true;
 						}
-						if (BANDOS_MINIONS.contains(npcName) || SARA_MINIONS.contains(npcName) || ZAMMY_MINIONS.contains(npcName) || ARMA_MINIONS.contains(npcName))
-						{
+						if (BANDOS_MINIONS.contains(npcName) || SARA_MINIONS.contains(npcName) || ZAMMY_MINIONS.contains(npcName) || ARMA_MINIONS.contains(npcName)) {
 							minionsAlive = true;
 						}
 					}
@@ -769,91 +759,52 @@ public class SpoonEzSwapsPlugin extends Plugin {
 
 				target = target.replace("*", "");
 
-				if (config.hideAttackBandos() && minionsAlive && target.contains(BANDOS_BOSS))
-				{
+				if (config.hideAttackBandos() && minionsAlive && target.contains(BANDOS_BOSS)) {
 					return false;
-				}
-				if (config.hideAttackBandosMinions() && bossAlive && BANDOS_MINIONS.contains(target))
-				{
+				} else if (config.hideAttackBandosMinions() && bossAlive && BANDOS_MINIONS.contains(target)) {
 					return false;
-				}
-				if (config.hideAttackSara() && minionsAlive && target.contains(SARA_BOSS))
-				{
+				} else if (config.hideAttackSara() && minionsAlive && target.contains(SARA_BOSS)) {
 					return false;
-				}
-				if (config.hideAttackSaraMinions() && bossAlive && SARA_MINIONS.contains(target))
-				{
+				} else if (config.hideAttackSaraMinions() && bossAlive && SARA_MINIONS.contains(target)) {
 					return false;
-				}
-				if (config.hideAttackZammy() && minionsAlive && target.contains(ZAMMY_BOSS))
-				{
+				} else if (config.hideAttackZammy() && minionsAlive && target.contains(ZAMMY_BOSS)) {
 					return false;
-				}
-				if (config.hideAttackZammyMinions() && bossAlive && ZAMMY_MINIONS.contains(target))
-				{
+				} else if (config.hideAttackZammyMinions() && bossAlive && ZAMMY_MINIONS.contains(target)) {
 					return false;
-				}
-				if (config.hideAttackKree() && minionsAlive && target.contains(ARMA_BOSS) && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId())
-				{
+				} else if (config.hideAttackKree() && minionsAlive && target.contains(ARMA_BOSS) && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId()) {
 					entry.setDeprioritized(true);
-				}
-				if (config.hideAttackArmaMinions() && bossAlive && ARMA_MINIONS.contains(target) && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId())
-				{
+					return true;
+				} else if (config.hideAttackArmaMinions() && bossAlive && ARMA_MINIONS.contains(target) && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId()) {
 					entry.setDeprioritized(true);
+					return true;
 				}
 			}
-		}
-
-		if ((config.swapDustDevils() || config.swapNechs() || config.swapSmokeDevil()) && option.equals("attack")
-				&& weaponStyle != null) {
-			boolean thermoAlive = false;
-
-			if ((config.swapDustDevils() && (target.contains("dust devil") || target.contains("choke devil")))
-					|| (config.swapNechs() && (target.contains("nechrya") || target.contains("death spawn")))) {
-				entry.setDeprioritized(weaponStyle == WeaponStyle.MAGIC);
-			}
-
-			if (config.swapSmokeDevil() && client.getLocalPlayer() != null) {
-				boolean hideAttack = target.contains("smoke devil") && !target.contains("thermonuclear") && !target.contains("pet");
-
-				if (client.getLocalPlayer().getWorldLocation().getRegionID() == 9619) {
-					for (NPC smokes : client.getNpcs()) {
-						String npcName = Text.standardize(smokes.getName());
-						if (smokes.getName() != null) {
-							if (npcName.contains("thermonuclear") && smokes.getHealthRatio() != 0) {
-								thermoAlive = true;
-							}
-
-							if (hideAttack) {
-								entry.setDeprioritized(thermoAlive || weaponStyle == WeaponStyle.MAGIC);
-							}
-						}
+		} else if ((config.swapDustDevils() && (target.contains("dust devil") || target.contains("choke devil"))) || (config.swapNechs() && (target.contains("nechrya") || target.contains("death spawn")))
+				&& option.equals("attack") && weaponStyle == WeaponStyle.MAGIC) {
+			entry.setDeprioritized(true);
+			return true;
+		} else if (config.swapSmokeDevil() && client.getLocalPlayer() != null && target.contains("smoke devil") && !target.contains("thermonuclear") && !target.contains("pet") && weaponStyle == WeaponStyle.MAGIC) {
+			if (client.getLocalPlayer().getWorldLocation().getRegionID() == 9619) {
+				for (NPC smokes : client.getNpcs()) {
+					if (smokes.getName() != null && Text.standardize(smokes.getName()).contains("thermonuclear") && smokes.getHealthRatio() != 0) {
+						entry.setDeprioritized(true);
+						return true;
 					}
-				} else if (client.getLocalPlayer().getWorldLocation().getRegionID() == 9363 && hideAttack) {
-					entry.setDeprioritized(true);
 				}
+			} else if (client.getLocalPlayer().getWorldLocation().getRegionID() == 9363) {
+				entry.setDeprioritized(true);
+				return true;
 			}
-		}
-
-		if (config.deprioVetion() && client.getVar(Varbits.IN_WILDERNESS) == 1) {
-			boolean houndsAlive = false;
-			for (NPC npc : client.getNpcs())
-			{
-				if (npc != null && npc.getName() != null && npc.getHealthRatio() != 0)
-				{
-					String npcName = Text.standardize(npc.getName());
-					if (npcName.contains("skeleton hellhound"))
-					{
-						houndsAlive = true;
+		} else if (config.deprioVetion() && client.getVar(Varbits.IN_WILDERNESS) == 1 && target.contains("vet'ion") && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId()) {
+			for (NPC npc : client.getNpcs()) {
+				if (npc != null && npc.getName() != null && npc.getHealthRatio() != 0) {
+					if (Text.standardize(npc.getName()).contains("skeleton hellhound")) {
+						entry.setDeprioritized(true);
+						return true;
 					}
 				}
 			}
-
-			if (target.contains("vet'ion") && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId()) {
-				entry.setDeprioritized(houndsAlive);
-			}
 		}
-
 		return true;
 	};
 
@@ -982,7 +933,7 @@ public class SpoonEzSwapsPlugin extends Plugin {
 		}
 	}
 
-	private final ArrayList<Integer> GWD_MAP_REGIONS = new ArrayList<>(Arrays.asList(11603, 11347, 11346, 11601));
+	private final ArrayList<Integer> GWD_MAP_REGIONS = new ArrayList<>(Arrays.asList(11603, 11347, 11346, 11601, 11602));
 
 	public boolean isInGodWars() {
 		if (client.isInInstancedRegion() && client.getLocalPlayer() != null) {
@@ -1058,7 +1009,11 @@ public class SpoonEzSwapsPlugin extends Plugin {
 				FilenameFilter textFilefilter = new FilenameFilter(){
 					public boolean accept(File dir, String name) {
 						String lowercaseName = name.toLowerCase();
-						return lowercaseName.endsWith(".wav");
+						if (lowercaseName.endsWith(".wav")) {
+							return true;
+						} else {
+							return false;
+						}
 					}
 				};
 
@@ -1123,11 +1078,78 @@ public class SpoonEzSwapsPlugin extends Plugin {
 		}
 
 		updateitemCounts();
+
+		if (config.getEasyConstruction()) {
+			if (!clientUI.isFocused())
+			{
+				return;
+			}
+
+			int afkKey = config.getAfkConstructionHouseMode().getKey();
+			Widget createMenu = client.getWidget(458, 1);
+			Widget dialogOptions = client.getWidget(219, 1);
+			Widget demonPayment = client.getWidget(231, 5);
+			int delay = delayUtils.nextInt(0, 578);
+
+			if (config.afkConstruction()) {
+				if (dialogOptions != null && !dialogOptions.isHidden() && !dialogOptions.isSelfHidden()) {
+					for (Widget child : dialogOptions.getDynamicChildren()) {
+						if (child.getText().contains("Really remove it?") || child.getText().contains("Repeat last task?")) {
+							delayUtils.delayKey(KeyEvent.VK_1, delay);
+						} else if (child.getText().contains("Okay, here's 10,000 coins.")) {
+							delayUtils.delayKey(KeyEvent.VK_1, delay);
+						}
+					}
+				}
+
+				if (demonPayment != null && !demonPayment.isHidden() && !demonPayment.isSelfHidden()) {
+					if (demonPayment.getText().contains("Master, if thou desire")) {
+						delayUtils.delayKey(KeyEvent.VK_SPACE, delay);
+					}
+				}
+
+				if (createMenu != null && !createMenu.isHidden() && !createMenu.isSelfHidden() & !config.afkConstructionMahoganyHomes()) {
+					delayUtils.delayKey(afkKey, delay);
+				}
+			}
+
+			//Mahogany homes afk con
+
+			if (config.afkConstructionMahoganyHomes()) {
+				int key = config.getAfkConstructionMahoganyHomesMode().getKey(); //keypress for config, presses 3 if teak, 4 if mahog
+				Widget playerDialog = client.getWidget(217,6);
+				Widget npcDialog = client.getWidget(231,6);
+
+				if (dialogOptions!=null){
+					if (dialogOptions.getChild(3)!=null && dialogOptions.getChild(3).getText().contains("Adept Contract (Requires 50 Construction)")){
+						delayUtils.delayKey(key, delay);
+					}
+					if (dialogOptions.getChild(0)!=null && dialogOptions.getChild(0).getText().contains("Take tea?")){
+						delayUtils.delayKey(KeyEvent.VK_1, delay);
+					}
+				}
+
+				if (playerDialog!=null && (playerDialog.getText().contains("I'd like a construction contract.")
+						||playerDialog.getText().contains("Could I have an adept contract please?")
+						||playerDialog.getText().contains("Could I have an expert contract please?")
+						||playerDialog.getText().contains("I've finished with the work you wanted.")
+						||playerDialog.getText().contains("Yes, I'd love a cuppa."))
+						|| npcDialog!=null && (npcDialog.getText().contains("What kind of contract would you like?")
+						||npcDialog.getText().contains("Thank you so much! Would you like a cup of tea<br>before you go?"))){
+					delayUtils.delayKey(KeyEvent.VK_SPACE, delay);
+				}
+
+				if (createMenu!=null && createMenu.getChild(1)!=null &&
+						createMenu.getChild(1).getText().contains("Furniture Creation Menu")) {
+					delayUtils.delayKey(key, delay);
+				}
+			}
+		}
 	}
 
 	@Subscribe
 	private void onWidgetLoaded (WidgetLoaded event) {
-		if(event.getGroupId() == WidgetInfo.DEPOSIT_BOX_INVENTORY_ITEMS_CONTAINER.getGroupId()) {
+		if (event.getGroupId() == WidgetInfo.DEPOSIT_BOX_INVENTORY_ITEMS_CONTAINER.getGroupId()) {
 			depositTab = true;
 		}
 	}

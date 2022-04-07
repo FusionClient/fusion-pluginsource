@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Point;
 import net.runelite.api.*;
 import net.runelite.api.events.*;
-import net.runelite.api.queries.GameObjectQuery;
-import net.runelite.api.queries.NPCQuery;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -28,10 +26,10 @@ import java.util.*;
 
 @Extension
 @PluginDescriptor(
-		name = "[F] Nex",
-		description = "Plugin for Nex",
-		tags = {"Nex", "gwd", "fusion", "Torva", "Ancient"},
-		enabledByDefault = false
+	name = "[F] Nex",
+	description = "Nihilism intensifies",
+	tags = {"Nex", "gwd", "Spoon", "Torva", "Ancient"},
+	enabledByDefault = false
 )
 @Slf4j
 @Singleton
@@ -58,10 +56,13 @@ public class SpoonNexPlugin extends Plugin {
 	private OverlayManager overlayManager;
 
 	@Inject
-	private InfoBoxManager infoBoxManager;
+	private SpoonNexHpToPhasePanel hpToPhaseOverlay;
 
 	@Inject
-	private ItemManager itemManager;
+    private InfoBoxManager infoBoxManager;
+
+	@Inject
+    private ItemManager itemManager;
 
 	@Inject
 	private ClientThread clientThread;
@@ -98,6 +99,14 @@ public class SpoonNexPlugin extends Plugin {
 
 	boolean pendingSet = false;
 
+	public String currentTank = "";
+	public ArrayList<FollowPlayer> followPlayers = new ArrayList<>();
+
+	public int hpToPhase = -1;
+
+	public NPC nexBanker = null;
+	public GameObject nexAltar = null;
+
 	@Provides
 	SpoonNexConfig provideConfig(ConfigManager configManager) {
 		return configManager.getConfig(SpoonNexConfig.class);
@@ -105,20 +114,28 @@ public class SpoonNexPlugin extends Plugin {
 
 	@Override
 	protected void startUp() {
+		followPlayers.clear();
+		nexBanker = null;
+		nexAltar = null;
 		reset();
 		overlayManager.add(overlay);
 		overlayManager.add(panelOverlay);
 		overlayManager.add(prayerOverlay);
 		overlayManager.add(phasePanel);
+		overlayManager.add(hpToPhaseOverlay);
 	}
 
 	@Override
 	protected void shutDown() {
+		followPlayers.clear();
+		nexBanker = null;
+		nexAltar = null;
 		reset();
 		overlayManager.remove(overlay);
 		overlayManager.remove(panelOverlay);
 		overlayManager.remove(prayerOverlay);
 		overlayManager.remove(phasePanel);
+		overlayManager.remove(hpToPhaseOverlay);
 		infoBoxManager.removeInfoBox(timerBox);
 	}
 
@@ -134,6 +151,8 @@ public class SpoonNexPlugin extends Plugin {
 		raveRunway.clear();
 		if(timerTicksLeft == 0)
 			infoBoxManager.removeInfoBox(timerBox);
+		currentTank = "";
+		hpToPhase = -1;
 	}
 
 	@Subscribe
@@ -141,17 +160,17 @@ public class SpoonNexPlugin extends Plugin {
 		if (event.getGroup().equals("SpoonNex")) {
 			if(event.getKey().equals("noEscapeVolume")) {
 				if (clip != null) {
-					FloatControl control = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-					if (control != null) {
-						control.setValue((float) (this.config.audioVolume() / 2 - 45));
-					}
-				}
+                    FloatControl control = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                    if (control != null) {
+                        control.setValue((float) (this.config.audioVolume() / 2 - 45));
+                    }
+                }
 			} else if(event.getKey().equals("killTimer")) {
 				if (config.killTimer() == SpoonNexConfig.KillTimerMode.INFOBOX && nex != null && startTick > -1) {
-					BufferedImage image = itemManager.getImage(26348);
+                    BufferedImage image = itemManager.getImage(26348);
 					timerBox = new SpoonNexTimerBox(image, config, this, client);
 					infoBoxManager.addInfoBox(timerBox);
-				} else {
+                } else {
 					infoBoxManager.removeInfoBox(timerBox);
 				}
 			}
@@ -163,6 +182,8 @@ public class SpoonNexPlugin extends Plugin {
 		if(nexIds.contains(event.getNpc().getId())) {
 			nex = new Nex(event.getNpc());
 			timerTicksLeft = 0;
+		} else if (event.getNpc().getId() == 11289) {
+			nexBanker = event.getNpc();
 		}
 	}
 
@@ -177,6 +198,22 @@ public class SpoonNexPlugin extends Plugin {
 	private void onNpcDespawned(NpcDespawned event) {
 		if (nex != null && nex.npc != null && nex.npc.getName() != null && event.getNpc().getName() != null && nex.npc.getName().equals(event.getNpc().getName())) {
 			reset();
+		} else if (event.getNpc().getId() == 11289) {
+			nexBanker = null;
+		}
+	}
+
+	@Subscribe
+	private void onPlayerSpawned(PlayerSpawned event) {
+		if(nexAltar != null || nexBanker != null) {
+			followPlayers.add(new FollowPlayer(event.getPlayer()));
+		}
+	}
+
+	@Subscribe
+	private void onPlayerDespawned(PlayerDespawned event) {
+		if(nexAltar != null || nexBanker != null) {
+			followPlayers.removeIf(fp -> fp.player.getName() != null && fp.player.getName().equals(event.getPlayer().getName()));
 		}
 	}
 
@@ -191,7 +228,7 @@ public class SpoonNexPlugin extends Plugin {
 	@Subscribe
 	private void onAnimationChanged(AnimationChanged event) {
 		if (event.getActor() instanceof NPC && event.getActor().getName() != null && event.getActor().getName().equals("Nex")) {
-			if (event.getActor().getAnimation() == 9189 || event.getActor().getAnimation() == 9188 || event.getActor().getAnimation() == 9180) {
+			 if (event.getActor().getAnimation() == 9189 || event.getActor().getAnimation() == 9188 || event.getActor().getAnimation() == 9180) {
 				nex.attacksTilSpecial--;
 				if (nex.phase == 5 && nex.attacksTilSpecial == 0) {
 					nex.attacksTilSpecial = 4;
@@ -225,7 +262,7 @@ public class SpoonNexPlugin extends Plugin {
 
 	@Subscribe
 	private void onGameTick(GameTick tick) {
-		if (pendingSet && config.getShouldSetInput() && isInNexLobby()) {
+		if (pendingSet && config.getShouldSetInput() && nexBanker != null) {
 			pendingSet = false;
 			clientThread.invoke(() -> {
 				client.setVar(VarClientStr.INPUT_TEXT, config.setInputName());
@@ -234,6 +271,8 @@ public class SpoonNexPlugin extends Plugin {
 		}
 
 		if (nex != null) {
+			hpToPhase = client.getVarbitValue(6099) - (3400 - (680 * nex.phase));
+
 			if (nex.specialTicksLeft > 0) {
 				nex.specialTicksLeft--;
 				if (nex.specialTicksLeft == 0) {
@@ -274,6 +313,17 @@ public class SpoonNexPlugin extends Plugin {
 			for(int i=0; i<30; i++){
 				raveRunway.add(Color.getHSBColor(new Random().nextFloat(), 1.0F, 1.0F));
 			}
+
+			for (FollowPlayer fp : followPlayers) {
+				if (fp.currentLoc.getX() != fp.player.getWorldLocation().getX() || fp.currentLoc.getY() != fp.player.getWorldLocation().getY()) {
+					fp.prevLoc = fp.currentLoc;
+					fp.currentLoc = fp.player.getWorldLocation();
+
+					int xDiff = fp.prevLoc.getX() - nex.npc.getWorldLocation().getX();
+					int yDiff = fp.prevLoc.getY() - nex.npc.getWorldLocation().getY();
+					fp.prevUnderNex = ((2 >= xDiff && xDiff >= 0) && (2 >= yDiff && yDiff >= 0));
+				}
+			}
 		}
 
 		if(timerTicksLeft > 0) {
@@ -296,10 +346,31 @@ public class SpoonNexPlugin extends Plugin {
 
 	@Subscribe
 	public void onClientTick(ClientTick event) {
-		if (this.client.getGameState() == GameState.LOGGED_IN){
+		if (this.client.getGameState() == GameState.LOGGED_IN && nex != null && client.getLocalPlayer() != null && nexAltar != null && nexBanker == null){
 			ratJamFrame++;
 			if (ratJamFrame >= 35) {
 				ratJamFrame = 1;
+			}
+
+			if (config.followHelper() == SpoonNexConfig.FollowHelperMode.MES || config.followHelper() == SpoonNexConfig.FollowHelperMode.BOTH) {
+				MenuEntry[] menuEntries = client.getMenuEntries();
+				for (MenuEntry me : menuEntries) {
+					if (me.getOption().contains("Follow") && followPlayers.stream().anyMatch(fp -> fp.player.getName() != null && me.getTarget().contains(fp.player.getName()))) {
+						for (MenuEntry entry : menuEntries) {
+							if (entry.getOption().contains("Follow")) {
+								for (FollowPlayer fp : followPlayers) {
+									if(fp.player.getName() != null && entry.getTarget().contains(fp.player.getName())) {
+										entry.setDeprioritized(!fp.prevUnderNex);
+										break;
+									}
+								}
+							} else {
+								entry.setDeprioritized(true);
+							}
+						}
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -308,6 +379,8 @@ public class SpoonNexPlugin extends Plugin {
 	private void onGameObjectSpawned(GameObjectSpawned event) {
 		if (event.getGameObject().getId() == 42944 || event.getGameObject().getId() == 42942) {
 			gameObjects.add(event.getGameObject());
+		} else if (event.getGameObject().getId() == 42965) {
+			nexAltar = event.getGameObject();
 		}
 	}
 
@@ -315,6 +388,8 @@ public class SpoonNexPlugin extends Plugin {
 	private void onGameObjectDespawned(GameObjectDespawned event) {
 		if (event.getGameObject().getId() == 42944 || event.getGameObject().getId() == 42942) {
 			gameObjects.remove(event.getGameObject());
+		} else if (event.getGameObject().getId() == 42965) {
+			nexAltar = null;
 		}
 	}
 
@@ -325,7 +400,7 @@ public class SpoonNexPlugin extends Plugin {
 
 		if (text.contains("Nex: <col=9090ff>") || text.contains("Nex: <col=0000ff>")) {
 			if (text.contains("AT LAST!")) {
-				playAudio = "at_last.wav";
+				playAudio = "atLast.wav";
 			} else if ((text.contains("Fumus") || text.contains("Umbra") || text.contains("Cruor") || text.contains("Glacies")) && text.contains(", don't fail me!")) {
 				for(NPC npc : this.client.getNpcs()) {
 					if ((npc.getId() == 11283 && text.contains("Fumus, don't fail me!")) || (npc.getId() == 11284 && text.contains("Umbra, don't fail me!"))
@@ -337,28 +412,28 @@ public class SpoonNexPlugin extends Plugin {
 				}
 
 				if (text.contains("Fumus")) {
-					playAudio = "fumus_dont_fail_me.wav";
+					playAudio = "fumusDontFail.wav";
 					p1Boss = client.getTickCount();
 					if(config.phaseChatMessages() && config.showMinionSplit()) {
 						String phaseText = config.phaseNameType() == SpoonNexConfig.PhaseNameTypeMode.NUMBER ? "P1" : "Smoke Phase";
 						this.client.addChatMessage(ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Nex " + phaseText + " Boss Complete! Duration: <col=ff0000>" + ticksToTime(p1Boss - startTick) + "</col>", null);
 					}
 				} else if (text.contains("Umbra")) {
-					playAudio = "umbra_dont_fail_me.wav";
+					playAudio = "umbraDontFail.wav";
 					p2Boss = client.getTickCount();
 					if(config.phaseChatMessages() && config.showMinionSplit()) {
 						String phaseText = config.phaseNameType() == SpoonNexConfig.PhaseNameTypeMode.NUMBER ? "P2" : "Shadow Phase";
 						this.client.addChatMessage(ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Nex " + phaseText + " Boss Complete! Duration: <col=ff0000>" + ticksToTime(p2Boss - p1Tick) + "</col>", null);
 					}
 				} else if (text.contains("Cruor")) {
-					playAudio = "cruor_dont_fail_me.wav";
+					playAudio = "cruorDontFail.wav";
 					p3Boss = client.getTickCount();
 					if(config.phaseChatMessages() && config.showMinionSplit()) {
 						String phaseText = config.phaseNameType() == SpoonNexConfig.PhaseNameTypeMode.NUMBER ? "P3" : "Blood Phase";
 						this.client.addChatMessage(ChatMessageType.FRIENDSCHATNOTIFICATION, "", "Nex " + phaseText + " Boss Complete! Duration: <col=ff0000>" + ticksToTime(p3Boss - p2Tick) + "</col>", null);
 					}
 				} else if (text.contains("Glacies")) {
-					playAudio = "glacies_dont_fail_me.wav";
+					playAudio = "glaciesDontFail.wav";
 					p4Boss = client.getTickCount();
 					if(config.phaseChatMessages() && config.showMinionSplit()) {
 						String phaseText = config.phaseNameType() == SpoonNexConfig.PhaseNameTypeMode.NUMBER ? "P4" : "Ice Phase";
@@ -377,54 +452,54 @@ public class SpoonNexPlugin extends Plugin {
 				nex.currentSpecial = "virus";
 				nex.nextSpecial = "no escape";
 				nex.attacksTilSpecial = 5;
-				playAudio = "virus_flow_through_you.wav";
+				playAudio = "virus.wav";
 			} else if (text.contains("There is...")) {
 				nex.currentSpecial = "no escape";
 				nex.nextSpecial = "virus";
 				nex.attacksTilSpecial = 5;
 				nex.specialTicksLeft = 7;
-				playAudio = config.noEscape() == SpoonNexConfig.NoEscapeMode.NEX ? "there_is.wav" : "backInNam.wav";
+				playAudio = config.noEscape() == SpoonNexConfig.NoEscapeMode.NEX ? "thereIs.wav" : "backInNam.wav";
 			}  else if (text.contains("NO ESCAPE!")) {
 				if(config.noEscape() == SpoonNexConfig.NoEscapeMode.NEX)
-					playAudio = "no_escape.wav";
+					playAudio = "noEscape.wav";
 			} else if (text.contains("Embrace darkness!")) {
 				nex.currentSpecial = "darkness";
 				nex.nextSpecial = "shadows";
 				nex.attacksTilSpecial = 5;
-				playAudio = "embracedarkness.wav";
+				playAudio = "darkness.wav";
 			} else if (text.contains("Fear the shadow!")) {
 				nex.currentSpecial = "shadows";
 				nex.nextSpecial = "darkness";
 				nex.attacksTilSpecial = 5;
 				nex.specialTicksLeft = 5;
-				playAudio = "fear_the_shadow.wav";
+				playAudio = "fearTheShadows.wav";
 			} else if (text.contains("I demand a blood sacrifice!")) {
 				nex.currentSpecial = "sacrifice";
 				nex.nextSpecial = "siphon";
 				nex.attacksTilSpecial = 5;
 				nex.specialTicksLeft = 7;
-				playAudio = "demand_blood_sacrifice.wav";
+				playAudio = "bloodSacrifice.wav";
 			} else if (text.contains("A siphon will solve this!")) {
 				nex.currentSpecial = "siphon";
 				nex.nextSpecial = "sacrifice";
 				nex.attacksTilSpecial = 5;
 				nex.specialTicksLeft = 9;
-				playAudio = "a_siphon_will_solve_this.wav";
+				playAudio = "siphon.wav";
 			} else if (text.contains("Contain this!")) {
 				nex.currentSpecial = "contain";
 				nex.nextSpecial = "ice prison";
 				nex.attacksTilSpecial = 5;
 				nex.specialTicksLeft = 6;
-				playAudio = "contain_this.wav";
+				playAudio = "containThis.wav";
 			} else if (text.contains("Die now, in a prison of ice!")) {
 				nex.currentSpecial = "ice prison";
 				nex.nextSpecial = "contain";
 				nex.attacksTilSpecial = 5;
 				nex.specialTicksLeft = 14;
-				playAudio = "iceprison.wav";
+				playAudio = "icePrison.wav";
 			} else if (text.contains("Taste my wrath!")) {
 				nex.currentSpecial = "wrath";
-				playAudio = "taste_my_wrath.wav";
+				playAudio = "wrath.wav";
 				p5Tick = client.getTickCount();
 				timerTicksLeft = 35;
 				if(config.phaseChatMessages()) {
@@ -432,14 +507,14 @@ public class SpoonNexPlugin extends Plugin {
 					String msgText = "Nex " + phaseText + " Complete! Duration: <col=ff0000>" + ticksToTime(p5Tick - p4Tick) + "</col><br>Overall Duration: <col=ff0000>" + ticksToTime(p5Tick - startTick) + "</col>";
 					this.client.addChatMessage(ChatMessageType.FRIENDSCHATNOTIFICATION, "", msgText, null);
 				}
-				if(client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null && client.getLocalPlayer().getName().equals("JimSim"))
+				if(client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null && client.getLocalPlayer().getName().equals("CU inthe NT"))
 					event.setMessage("<col=ff0000>Allahuakbar! *Click*</col>");
 			} else if (text.contains("Fill my soul with smoke!")) {
 				nex.phase = 1;
 				activeMage = null;
 				nex.attacksTilSpecial = 0;
 				nex.invulnerableTicks = 6;
-				playAudio = "fill_my_soul_with_smoke.wav";
+				playAudio = "fillMySoul.wav";
 				if(startTick == -1) {
 					startTick = client.getTickCount();
 					if(config.killTimer() == SpoonNexConfig.KillTimerMode.INFOBOX) {
@@ -453,7 +528,7 @@ public class SpoonNexPlugin extends Plugin {
 				activeMage = null;
 				nex.attacksTilSpecial = 0;
 				nex.invulnerableTicks = 6;
-				playAudio = "darken_my_shadow.wav";
+				playAudio = "darkenMyShadow.wav";
 				p1Tick = client.getTickCount();
 				if(config.phaseChatMessages()) {
 					String phaseText = config.phaseNameType() == SpoonNexConfig.PhaseNameTypeMode.NUMBER ? "P1" : "Smoke Phase";
@@ -464,7 +539,7 @@ public class SpoonNexPlugin extends Plugin {
 				activeMage = null;
 				nex.attacksTilSpecial = 0;
 				nex.invulnerableTicks = 6;
-				playAudio = "flood_my_lungs_with_blood.wav";
+				playAudio = "floodMyLungs.wav";
 				p2Tick = client.getTickCount();
 				if(config.phaseChatMessages()) {
 					String phaseText = config.phaseNameType() == SpoonNexConfig.PhaseNameTypeMode.NUMBER ? "P2" : "Shadow Phase";
@@ -475,7 +550,7 @@ public class SpoonNexPlugin extends Plugin {
 				activeMage = null;
 				nex.attacksTilSpecial = 0;
 				nex.invulnerableTicks = 6;
-				playAudio = "infuse_me_with_the_power_of_ice.wav";
+				playAudio = "infuseWithIce.wav";
 				p3Tick = client.getTickCount();
 				if(config.phaseChatMessages()) {
 					String phaseText = config.phaseNameType() == SpoonNexConfig.PhaseNameTypeMode.NUMBER ? "P3" : "Blood Phase";
@@ -486,7 +561,7 @@ public class SpoonNexPlugin extends Plugin {
 				activeMage = null;
 				nex.attacksTilSpecial = 4;
 				nex.invulnerableTicks = 6;
-				playAudio = "now_the_power_of_zaros.wav";
+				playAudio = "zaros.wav";
 				p4Tick = client.getTickCount();
 				if(config.phaseChatMessages()) {
 					String phaseText = config.phaseNameType() == SpoonNexConfig.PhaseNameTypeMode.NUMBER ? "P4" : "Ice Phase";
@@ -510,10 +585,6 @@ public class SpoonNexPlugin extends Plugin {
 				} catch (Exception var6) {
 					nexAudio = null;
 				}
-				if(nexAudio != null) {
-					nexAudio.setFramePosition(0);
-					nexAudio.start();
-				}
 			}
 		} else {
 			if (text.contains("Nex has marked you for a blood sacrifice! RUN!")) {
@@ -530,28 +601,34 @@ public class SpoonNexPlugin extends Plugin {
 		}
 	}
 
-	public boolean isInNexChamber() { // banker isn't visible if inside nex room
-		NPC Banker = new NPCQuery()
-				.idEquals(11289)
-				.result(client)
-				.nearestTo(client.getLocalPlayer());
-
-		GameObject Altar = new GameObjectQuery()
-				.idEquals(42965)
-				.result(client)
-				.nearestTo(client.getLocalPlayer());
-
-		return Altar != null && Banker == null;
+	@Subscribe
+	private void onInteractionChanged(InteractingChanged event) {
+		if(nex != null && nex.npc != null && event.getSource() != null && event.getSource() instanceof NPC && nex.npc == event.getSource() && event.getTarget() != null) {
+			currentTank = event.getTarget().getName();
+		}
 	}
 
-	public boolean isInNexLobby() {
-		NPC Banker = new NPCQuery()
-				.idEquals(11289)
-				.result(client)
-				.nearestTo(client.getLocalPlayer());
-
-		return Banker != null;
-	}
+	/*@Subscribe
+    public void onSoundEffectPlayed(SoundEffectPlayed event) {
+        if (event.getSoundId() == 1111 || event.getSoundId() == 1111) {
+			try {
+				AudioInputStream stream = AudioSystem.getAudioInputStream(new BufferedInputStream(SpoonNexPlugin.class.getResourceAsStream("mkMoan.wav")));
+				AudioFormat format = stream.getFormat();
+				DataLine.Info info = new DataLine.Info(Clip.class, format);
+				nexAudio = (Clip) AudioSystem.getLine(info);
+				nexAudio.open(stream);
+				FloatControl control = (FloatControl) nexAudio.getControl(FloatControl.Type.MASTER_GAIN);
+				if (control != null) {
+					control.setValue((float) (config.mkMoanVolume() / 2 - 45));
+				}
+				nexAudio.setFramePosition(0);
+				nexAudio.start();
+			} catch (Exception var6) {
+				nexAudio = null;
+			}
+		}
+    }
+	 */
 
 	public String ticksToTime(int ticks) {
 		int min = ticks / 100;

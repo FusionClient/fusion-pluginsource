@@ -2,6 +2,7 @@ import ProjectVersions.rlVersion
 
 /*
  * Copyright (c) 2021 SpoonLite
+ * Copyright (c) 2022 Fusion
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,11 +26,10 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "3.0.1"
+version = "1.0.4"
 
-project.extra["PluginName"] = "[F] Nex"
-project.extra["PluginDescription"] = "Extra Nex. Made by SpoonLite"
-
+project.extra["PluginName"] = "[F] GOTR"
+project.extra["PluginDescription"] = "SpoonLites GOTR Plugin"
 
 dependencies {
     annotationProcessor(Libraries.lombok)
@@ -50,11 +50,11 @@ tasks {
     jar {
         manifest {
             attributes(mapOf(
-                "Plugin-Version" to project.version,
-                "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
-                "Plugin-Provider" to project.extra["PluginProvider"],
-                "Plugin-Description" to project.extra["PluginDescription"],
-                "Plugin-License" to project.extra["PluginLicense"]
+                    "Plugin-Version" to project.version,
+                    "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
+                    "Plugin-Provider" to project.extra["PluginProvider"],
+                    "Plugin-Description" to project.extra["PluginDescription"],
+                    "Plugin-License" to project.extra["PluginLicense"]
             ))
         }
     }

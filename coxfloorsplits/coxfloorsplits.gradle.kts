@@ -1,9 +1,7 @@
 import ProjectVersions.rlVersion
+
 /*
- * Copyright (c) 2021 Caps Lock13
- * Copyright (c) 2021 BikkusLite
- * Copyright (c) 2022 SpoonLite
- * Copyright (c) 2022 Fusion
+ * Copyright (c) 2021 SpoonLite
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +24,11 @@ import ProjectVersions.rlVersion
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-version = "3.0.0"
 
-project.extra["PluginName"] = "[F] Low Detail"
-project.extra["PluginDescription"] = "Turns off at bloat"
+version = "2.0.0"
+
+project.extra["PluginName"] = "Cox Floor Splits"
+project.extra["PluginDescription"] = "Displays your floor splits and Olm time"
 
 dependencies {
     annotationProcessor(Libraries.lombok)
@@ -50,11 +49,11 @@ tasks {
     jar {
         manifest {
             attributes(mapOf(
-                "Plugin-Version" to project.version,
-                "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
-                "Plugin-Provider" to project.extra["PluginProvider"],
-                "Plugin-Description" to project.extra["PluginDescription"],
-                "Plugin-License" to project.extra["PluginLicense"]
+                    "Plugin-Version" to project.version,
+                    "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
+                    "Plugin-Provider" to project.extra["PluginProvider"],
+                    "Plugin-Description" to project.extra["PluginDescription"],
+                    "Plugin-License" to project.extra["PluginLicense"]
             ))
         }
     }

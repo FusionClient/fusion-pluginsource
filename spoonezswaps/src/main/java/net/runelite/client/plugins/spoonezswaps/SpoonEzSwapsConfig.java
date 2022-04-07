@@ -31,9 +31,17 @@ public interface SpoonEzSwapsConfig extends Config
 	String keyCustomSwapsSection = "Hotkey Swaps";
 
 	@ConfigSection(
+			name = "Region Swaps",
+			description = "Configuration for Region Swaps",
+			position = 3,
+			closedByDefault = true
+	)
+	String regionSwapsSection = "Region Swaps";
+
+	@ConfigSection(
 			name = "Remove Options",
 			description = "Configuration for removing swaps",
-			position = 3,
+			position = 4,
 			closedByDefault = true
 	)
 	String removeSwapsSection = "Remove Options";
@@ -41,7 +49,7 @@ public interface SpoonEzSwapsConfig extends Config
 	@ConfigSection(
 			name = "Skilling",
 			description = "",
-			position = 4,
+			position = 5,
 			keyName = "skillingSection",
 			closedByDefault = true
 	)
@@ -50,7 +58,7 @@ public interface SpoonEzSwapsConfig extends Config
 	@ConfigSection(
 			name = "Diary",
 			description = "",
-			position = 5,
+			position = 6,
 			keyName = "diarySection",
 			closedByDefault = true
 	)
@@ -59,7 +67,7 @@ public interface SpoonEzSwapsConfig extends Config
 	@ConfigSection(
 			name = "Teleportation",
 			description = "",
-			position = 6,
+			position = 7,
 			keyName = "teleportationSection",
 			closedByDefault = true
 	)
@@ -68,7 +76,7 @@ public interface SpoonEzSwapsConfig extends Config
 	@ConfigSection(
 			name = "Misc",
 			description = "",
-			position = 7,
+			position = 8,
 			keyName = "miscSection",
 			closedByDefault = true
 	)
@@ -77,7 +85,7 @@ public interface SpoonEzSwapsConfig extends Config
 	@ConfigSection(
 			name = "PvM",
 			description = "",
-			position = 8,
+			position = 9,
 			keyName = "pvmSection",
 			closedByDefault = true
 	)
@@ -86,7 +94,7 @@ public interface SpoonEzSwapsConfig extends Config
 	@ConfigSection(
 			name = "Audio",
 			description = "",
-			position = 9,
+			position = 10,
 			keyName = "audioSection",
 			closedByDefault = true
 	)
@@ -123,10 +131,63 @@ public interface SpoonEzSwapsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "afkConstruction",
+			name = "Afk Construction",
+			description = "You click, it presses key.",
+			position = 2,
+			section = skillingSection,
+			hidden = true,
+			unhide = "getEasyConstruction"
+	)
+	default boolean afkConstruction()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+			keyName = "getAfkConstructionHouseMode",
+			name = "Afk Construction Mode",
+			description = "Sets the key to the item you want to make",
+			position = 3,
+			section = skillingSection,
+			hidden = true,
+			unhide = "afkConstruction"
+	)
+	default AfkConstructionHouseMode getAfkConstructionHouseMode() { return AfkConstructionHouseMode.MAHOGANY_TABLES; }
+
+	@ConfigItem(
+			keyName = "afkConstructionMahoganyHomes",
+			name = "Afk Construction (Mahogany Homes)",
+			description = "",
+			position = 4,
+			section = skillingSection,
+			hidden = true,
+			unhide = "getEasyConstruction"
+	)
+	default boolean afkConstructionMahoganyHomes()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "getAfkConstructionMahoganyHomesMode",
+			name = "Afk Construction Mode",
+			description = "Teaks or Mahogany",
+			position = 5,
+			section = skillingSection,
+			hidden = true,
+			unhide = "afkConstructionMahoganyHomes"
+	)
+	default AfkConstructionMahoganyHomesMode getAfkConstructionMahoganyHomesMode()
+	{
+		return AfkConstructionMahoganyHomesMode.TEAK_HOMES;
+	}
+
+	@ConfigItem(
 			keyName = "stringAmulet",
 			name = "String Amulet Overlay",
 			description = "Overlay indicating how many amulets in your invent are strung",
-			position = 2,
+			position = 6,
 			section = skillingSection
 	)
 	default boolean getStringAmulet() {
@@ -137,7 +198,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "cookPie",
 			name = "Bake Pie Overlay",
 			description = "Overlay indicating how many summer pies in your inventory are baked",
-			position = 3,
+			position = 7,
 			section = skillingSection
 	)
 	default boolean getBakePie() {
@@ -148,7 +209,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "swapPickpocket",
 			name = "Pickpocket",
 			description = "Swap Talk-to with Pickpocket on NPC<br>Example: Man, Woman",
-			position = 4,
+			position = 8,
 			section = skillingSection
 	)
 	default boolean swapPickpocket()
@@ -160,7 +221,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "swapHerblore",
 			name = "Herblore",
 			description = "Removes the `drink` option on herblore potions - for herblore training",
-			position = 5,
+			position = 9,
 			section = skillingSection
 	)
 	default boolean swapHerblore()
@@ -172,7 +233,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "karambwans",
 			name = "Karambwans",
 			description = "Swaps max cape left click teleports depending on location.",
-			position = 6,
+			position = 10,
 			section = skillingSection,
 			disabledBy = "swapMaxCape"
 	)
@@ -185,12 +246,12 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "customDrop",
 			name = "Left Click Drop",
 			description = "Anything in the list will be dropped on left click",
-			position = 7,
+			position = 11,
 			section = skillingSection
 	)
 	default String customDrop()
 	{
-		return "iron ore, blisterwood log, empty plant pot, leaping trout, leaping salmon, leaping sturgeon, sandstone (1kg), sandstone (2kg), sandstone (5kg), sandstone (10kg), granite (500g), granite (2kg), granite (5kg)";
+		return "";
 	}
 
 	//------------------------------------------------------------//
@@ -771,10 +832,19 @@ public interface SpoonEzSwapsConfig extends Config
 	default boolean deprioVetion() { return false; }
 
 	@ConfigItem(
+			keyName = "vetionBoosting",
+			name = "Vet'ion Boosting",
+			description = "Deprioritizes attack if you dont attack within 1 tick of the alt",
+			position = 9,
+			section = pvmSection
+	)
+	default boolean vetionBoosting() { return false; }
+
+	@ConfigItem(
 			keyName = "vengDeezNuts",
 			name = "Vengeance Message",
 			description = "Replaces 'Taste Vengeance' with a custom message",
-			position = 9,
+			position = 10,
 			section = pvmSection
 	)
 	default boolean vengDeezNuts() { return false; }
@@ -783,7 +853,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "vengMessage",
 			name = "Vengeance Message Text",
 			description = "Sets the overhead text to the custom message when vengeance is popped",
-			position = 10,
+			position = 11,
 			section = pvmSection,
 			hidden = true,
 			unhide = "vengDeezNuts"
@@ -794,7 +864,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "hideAttackBandos",
 			name = "Hide Attack Graardor",
 			description = "Hides attack on Graardor while minions are alive",
-			position = 11,
+			position = 12,
 			section = pvmSection
 	)
 	default boolean hideAttackBandos() { return false; }
@@ -803,7 +873,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "hideAttackBandosMinions",
 			name = "Hide Attack Bandos Minions",
 			description = "Hides attack on minions while Graardor is alive",
-			position = 12,
+			position = 13,
 			section = pvmSection
 	)
 	default boolean hideAttackBandosMinions() { return false; }
@@ -812,7 +882,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "hideAttackSara",
 			name = "Hide Attack Zilyana",
 			description = "Hides attack on Zilyana when any minion is alive",
-			position = 13,
+			position = 14,
 			section = pvmSection
 	)
 	default boolean hideAttackSara() { return false; }
@@ -821,7 +891,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "hideAttackSaraMinions",
 			name = "Hide Attack Sara Minions",
 			description = "Hides attack on Starlight while Zilyana is alive",
-			position = 14,
+			position = 15,
 			section = pvmSection
 	)
 	default boolean hideAttackSaraMinions() { return true; }
@@ -830,7 +900,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "hideAttackZammy",
 			name = "Hide Attack K'ril",
 			description = "Hides attack on K'ril when any minion is alive",
-			position = 15,
+			position = 16,
 			section = pvmSection
 	)
 	default boolean hideAttackZammy() { return false; }
@@ -839,7 +909,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "hideAttackZammyMinions",
 			name = "Hide Attack Zammy Minions",
 			description = "Hides attack on minions when Kril is alive",
-			position = 16,
+			position = 17,
 			section = pvmSection
 	)
 	default boolean hideAttackZammyMinions() { return false; }
@@ -848,7 +918,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "hideAttackKree",
 			name = "Deprio Attack Kree",
 			description = "Deprioritizes attack on Kree when any minion is alive",
-			position = 17,
+			position = 18,
 			section = pvmSection
 	)
 	default boolean hideAttackKree() { return false; }
@@ -857,7 +927,7 @@ public interface SpoonEzSwapsConfig extends Config
 			keyName = "hideAttackArmaMinions",
 			name = "Deprio Attack Arma Minions",
 			description = "Deprioritizes attack on minions while Kree is alive",
-			position = 18,
+			position = 19,
 			section = pvmSection
 	)
 	default boolean hideAttackArmaMinions() { return false; }
@@ -951,6 +1021,7 @@ public interface SpoonEzSwapsConfig extends Config
 		return "";
 	}
 
+	//Shift Section
 	@ConfigItem(
 			name = "Shift Swaps Toggle",
 			keyName = "shiftCustomSwapsToggle",
@@ -987,6 +1058,7 @@ public interface SpoonEzSwapsConfig extends Config
 		return "";
 	}
 
+	//Hotkey Section
 	@ConfigItem(
 			name = "Hotkey Swaps Toggle",
 			keyName = "keyCustomSwapsToggle",
@@ -1035,6 +1107,53 @@ public interface SpoonEzSwapsConfig extends Config
 		return "";
 	}
 
+	//Region Section
+	@ConfigItem(
+			name = "Region Swaps Toggle",
+			keyName = "regionSwapsToggle",
+			description = "Toggles the use of the Custom Swaps",
+			section = regionSwapsSection,
+			position = 1
+	)
+	default boolean regionCustomSwapsToggle()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			name = "Region IDs",
+			keyName = "regionSpecificRegions",
+			description = "Find these by going to developer tools in the side bar and turning on 'location'<br> The default ID is the ID for player owned house",
+			section = regionSwapsSection,
+			position = 2
+	)
+	default String regionSpecificRegions() { return ""; }
+
+	@ConfigItem(
+			name = "Region Swaps",
+			keyName = "regionCustomSwapsStr",
+			description = "",
+			section = regionSwapsSection,
+			position = 3
+	)
+	default String regionCustomSwapsString()
+	{
+		return "";
+	}
+
+	@ConfigItem(
+			name = "Region Bank Swaps",
+			keyName = "bankRegionCustomSwapsStr",
+			description = "",
+			section = regionSwapsSection,
+			position = 4
+	)
+	default String bankRegionCustomSwapsString()
+	{
+		return "";
+	}
+
+	//Remove Section
 	@ConfigItem(
 			name = "Remove Options Toggle",
 			keyName = "removeOptionsToggle",
