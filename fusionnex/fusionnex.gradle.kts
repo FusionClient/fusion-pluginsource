@@ -25,7 +25,7 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "3.0.1"
+version = "3.0.2"
 
 project.extra["PluginName"] = "[F] Nex"
 project.extra["PluginDescription"] = "Extra Nex. Made by SpoonLite"
