@@ -443,7 +443,7 @@ public class CoxAdditionsPlugin extends Plugin {
     @Subscribe
     private void onChatMessage(ChatMessage event) {
         String msg = Text.standardize(event.getMessageNode().getValue());
-        if (client.getVar(Varbits.IN_RAID) == 1) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1) {
             if (msg.equalsIgnoreCase("the great olm's left claw clenches to protect itself temporarily.")){
                 handCripple = true;
             } else if (msg.equalsIgnoreCase("the great olm infects you with a burning overwhelming power.")){
@@ -506,7 +506,7 @@ public class CoxAdditionsPlugin extends Plugin {
 
     @Subscribe
     private void onGameTick(GameTick event) {
-		if (client.getVar(Varbits.IN_RAID) == 1){
+		if (client.getVarbitValue(Varbits.IN_RAID) == 1){
 			if (handCripple) {
 				crippleTimer--;
 				if (crippleTimer <= 0) {
@@ -638,7 +638,7 @@ public class CoxAdditionsPlugin extends Plugin {
 
     @Subscribe
     private void onProjectileMoved(ProjectileMoved event) {
-        if (client.getVar(Varbits.IN_RAID) == 1) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1) {
             if (event.getProjectile().getId() == 1355) {
                 olmHealingPools.add(new HealingPoolInfo(event.getPosition(), 10));
             }
@@ -648,7 +648,7 @@ public class CoxAdditionsPlugin extends Plugin {
     @Subscribe
     private void onGameObjectSpawned(GameObjectSpawned event) {
         GameObject obj = event.getGameObject();
-        if (client.getVar(Varbits.IN_RAID) == 1) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1) {
             if (obj.getId() >= 29997 && obj.getId() <= 29999) {
                 if (coxHerb1 == null) {
                     coxHerb1 = obj;
@@ -679,7 +679,7 @@ public class CoxAdditionsPlugin extends Plugin {
     @Subscribe
     private void onGameObjectDespawned(GameObjectDespawned event) {
         GameObject obj = event.getGameObject();
-        if (client.getVar(Varbits.IN_RAID) == 1) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1) {
             if (coxHerb1 != null || coxHerb2 != null) {
                 if (obj.getId() >= 29997 && obj.getId() <= 30008) {
                     if (coxHerb1 != null) {
@@ -700,7 +700,7 @@ public class CoxAdditionsPlugin extends Plugin {
     @Subscribe
     private void onGroundObjectSpawned(GroundObjectSpawned event) {
         GroundObject obj = event.getGroundObject();
-        if (client.getVar(Varbits.IN_RAID) == 1 && obj.getId() == 29750) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1 && obj.getId() == 29750) {
             if ((rope.size() > 0 && ropeSpawnDelay == 0) || rope.size() >= 2) {
                 rope.clear();
             }
@@ -727,7 +727,7 @@ public class CoxAdditionsPlugin extends Plugin {
 
     @Subscribe
     private void onNpcSpawned(NpcSpawned event) {
-        if (client.getVar(Varbits.IN_RAID) == 1 && event.getNpc() != null) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1 && event.getNpc() != null) {
             NPC npc = event.getNpc();
             int id = npc.getId();
             String name = npc.getName();
@@ -778,7 +778,7 @@ public class CoxAdditionsPlugin extends Plugin {
 
     @Subscribe
     private void onNpcDespawned(NpcDespawned event){
-        if (client.getVar(Varbits.IN_RAID) == 1) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1) {
             NPC npc = event.getNpc();
             int id = npc.getId();
             String name = npc.getName();
@@ -863,7 +863,7 @@ public class CoxAdditionsPlugin extends Plugin {
 
     @Subscribe
     private void onNpcChanged(NpcChanged event){
-        if (client.getVar(Varbits.IN_RAID) == 1) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1) {
             NPC npc = event.getNpc();
             int id = npc.getId();
 
@@ -883,7 +883,7 @@ public class CoxAdditionsPlugin extends Plugin {
 
     @Subscribe
     private void onItemContainerChanged(ItemContainerChanged event) {
-        if (client.getVar(Varbits.IN_RAID) == 1) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1) {
             if (event.getContainerId() == InventoryID.INVENTORY.getId()) {
                 coxSpade = false;
                 coxDibbler = false;
@@ -904,7 +904,7 @@ public class CoxAdditionsPlugin extends Plugin {
 
     @Subscribe
     public void onAnimationChanged(AnimationChanged event) {
-        if (client.getVar(Varbits.IN_RAID) == 1 && event.getActor() instanceof NPC) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1 && event.getActor() instanceof NPC) {
 			NPC npc = (NPC) event.getActor();
             if (npc != null && npc.getName() != null && npc.getName().equalsIgnoreCase("lizardman shaman")) {
                 for (ShamanInfo shamanInfo : shamanInfoList) {
@@ -927,7 +927,7 @@ public class CoxAdditionsPlugin extends Plugin {
 
     @Subscribe
     private void onActorDeath(ActorDeath event){
-        if (client.getVar(Varbits.IN_RAID) == 1 && event.getActor() instanceof NPC) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1 && event.getActor() instanceof NPC) {
 			NPC npc = (NPC) event.getActor();
             if (npc.getName() != null) {
                 if (npc.getName().toLowerCase().contains("great olm (left claw)")) {
@@ -948,7 +948,7 @@ public class CoxAdditionsPlugin extends Plugin {
     }
 
     private final Predicate<MenuEntry> filterMenuEntries = entry -> {
-        if (client.getVar(Varbits.IN_RAID) == 1) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1) {
         int id = entry.getIdentifier();
         String option = Text.standardize(entry.getOption(), true).toLowerCase();
         String target = Text.standardize(entry.getTarget(), true).toLowerCase();
@@ -1154,7 +1154,7 @@ public class CoxAdditionsPlugin extends Plugin {
         String option = Text.removeTags(menuEntry.getOption()).toLowerCase();
         String target = Text.removeTags(menuEntry.getTarget()).toLowerCase();
 
-        if (client.getVar(Varbits.IN_RAID) == 1) {
+        if (client.getVarbitValue(Varbits.IN_RAID) == 1) {
             if (config.swapCoXKeystone() && target.equals("keystone crystal") && option.equals("use")) {
                 swap("drop", option, target, index, false);
             }
@@ -1243,7 +1243,7 @@ public class CoxAdditionsPlugin extends Plugin {
 
     @Subscribe
     public void onVarbitChanged(VarbitChanged event) {
-        if (client.getVar(Varbits.IN_RAID) != 1) {
+        if (client.getVarbitValue(Varbits.IN_RAID) != 1) {
             meleeHand = null;
             mageHand = null;
             crippleTimer = 45;

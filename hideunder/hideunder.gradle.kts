@@ -25,7 +25,7 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "3.0.2"
+version = "3.0.4"
 
 project.extra["PluginName"] = "[F] Hide Under"
 project.extra["PluginDescription"] = "Hide local player when under targeted players"

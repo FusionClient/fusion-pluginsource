@@ -301,7 +301,7 @@ public class SpoonEzSwapsPlugin extends Plugin {
 
 	@Subscribe
 	public void onAnimationChanged(AnimationChanged event) {
-		if (event.getActor() instanceof Player && config.vetionBoosting() && event.getActor().getAnimation() == 1162 && client.getVar(Varbits.IN_WILDERNESS) == 1){
+		if (event.getActor() instanceof Player && config.vetionBoosting() && event.getActor().getAnimation() == 1162 && client.getVarbitValue(Varbits.IN_WILDERNESS) == 1){
 			vetionHarmAttackedTick = client.getTickCount();
 		}
 	}
@@ -725,7 +725,7 @@ public class SpoonEzSwapsPlugin extends Plugin {
 					}
 					break;
 			}
-		} else if (config.hideCastRaids() && (client.getVar(Varbits.IN_RAID) == 1 || client.getVar(Varbits.THEATRE_OF_BLOOD) == 2)
+		} else if (config.hideCastRaids() && (client.getVarbitValue(Varbits.IN_RAID) == 1 || client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) == 2)
 				&& (!client.getSpellSelected() || hideCastIgnoredSpells.contains(Text.standardize(client.getSelectedSpellName()))
 				|| entry.getType().getId() != MenuAction.SPELL_CAST_ON_PLAYER.getId())) {
 			return true;
@@ -795,7 +795,7 @@ public class SpoonEzSwapsPlugin extends Plugin {
 				entry.setDeprioritized(true);
 				return true;
 			}
-		} else if (config.deprioVetion() && client.getVar(Varbits.IN_WILDERNESS) == 1 && target.contains("vet'ion") && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId()) {
+		} else if (config.deprioVetion() && client.getVarbitValue(Varbits.IN_WILDERNESS) == 1 && target.contains("vet'ion") && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId()) {
 			for (NPC npc : client.getNpcs()) {
 				if (npc != null && npc.getName() != null && npc.getHealthRatio() != 0) {
 					if (Text.standardize(npc.getName()).contains("skeleton hellhound")) {

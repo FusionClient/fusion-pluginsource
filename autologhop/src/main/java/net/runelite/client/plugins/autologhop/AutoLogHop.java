@@ -303,7 +303,7 @@ public class AutoLogHop extends Plugin {
     }
 
     public boolean inWilderness() {
-        return client.getVar(Varbits.IN_WILDERNESS) == 1;
+        return client.getVarbitValue(Varbits.IN_WILDERNESS) == 1;
     }
 
     public boolean isInWhitelist(String username) {

@@ -1,6 +1,6 @@
 import ProjectVersions.rlVersion
 
-version = "3.0.2"
+version = "3.0.4"
 
 project.extra["PluginName"] = "[F] Server Variance"
 project.extra["PluginDescription"] = "Checks the ping of the server"
