@@ -5,7 +5,7 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ItemID;
 import net.runelite.api.MenuAction;
-import static net.runelite.api.MenuAction.ITEM_USE_ON_WIDGET_ITEM;
+import static net.runelite.api.MenuAction.ITEM_USE_ON_ITEM;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOptionClicked;
@@ -38,7 +38,7 @@ public class Firemaking extends ClickCompare
 		client.createMenuEntry(-1)
 			.setOption(event.getOption())
 			.setTarget("<col=ff9040>Tinderbox<col=ffffff> -> " + getTargetMap().get(event.getIdentifier()))
-			.setType(ITEM_USE_ON_WIDGET_ITEM)
+			.setType(ITEM_USE_ON_ITEM)
 			.setIdentifier(event.getIdentifier())
 			.setParam0(event.getActionParam0())
 			.setParam1(event.getActionParam1())

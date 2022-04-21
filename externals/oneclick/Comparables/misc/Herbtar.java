@@ -35,7 +35,7 @@ public class Herbtar extends ClickCompare
 		client.createMenuEntry(-1)
 			.setOption(event.getOption())
 			.setTarget("<col=ff9040>Swamp tar<col=ffffff> -> " + getTargetMap().get(event.getIdentifier()))
-			.setType(MenuAction.ITEM_USE_ON_WIDGET_ITEM)
+			.setType(MenuAction.ITEM_USE_ON_ITEM)
 			.setIdentifier(event.getIdentifier())
 			.setParam0(event.getActionParam0())
 			.setParam1(event.getActionParam1())

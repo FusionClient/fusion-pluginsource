@@ -95,12 +95,12 @@ public class Maiden extends Room {
     public int maidenAttSpd = 10;
     public int lastAnimationID = -1;
 
-    private static final Set<MenuAction> NPC_MENU_ACTIONS = ImmutableSet.of(MenuAction.NPC_FIRST_OPTION, MenuAction.NPC_SECOND_OPTION, MenuAction.NPC_THIRD_OPTION, MenuAction.NPC_FOURTH_OPTION, MenuAction.NPC_FIFTH_OPTION, MenuAction.SPELL_CAST_ON_NPC, MenuAction.ITEM_USE_ON_NPC);;
+    private static final Set<MenuAction> NPC_MENU_ACTIONS = ImmutableSet.of(MenuAction.NPC_FIRST_OPTION, MenuAction.NPC_SECOND_OPTION, MenuAction.NPC_THIRD_OPTION, MenuAction.NPC_FOURTH_OPTION, MenuAction.NPC_FIFTH_OPTION, MenuAction.WIDGET_TARGET_ON_NPC, MenuAction.ITEM_USE_ON_NPC);
     public Color c;
 
     public int nyloSpawnDelay = 2;
     public int maidenPhase = 70;
-    public ArrayList<MaidenCrabInfo> maidenCrabInfoList = new ArrayList<MaidenCrabInfo>();
+    public ArrayList<MaidenCrabInfo> maidenCrabInfoList = new ArrayList<>();
     public Map<NPC, Integer> frozenBloodSpawns = new HashMap<>();
     public int crabTicksSinceSpawn = 0;
 
@@ -396,7 +396,7 @@ public class Maiden extends Room {
                 if (npc != null) {
                     client.setMenuOptionCount(client.getMenuOptionCount() - 1);
                 }
-            } else if (event.getTarget().contains("Blood spawn") && event.getTarget().contains("Ice B") && event.getType() == MenuAction.SPELL_CAST_ON_NPC.getId()
+            } else if (event.getTarget().contains("Blood spawn") && event.getTarget().contains("Ice B") && event.getType() == MenuAction.WIDGET_TARGET_ON_NPC.getId()
                     && (config.removeMaidenBloods() == SpoonTobConfig.maidenBloodsMode.CAST || config.removeMaidenBloods() == SpoonTobConfig.maidenBloodsMode.BOTH)) {
                 NPC npc = client.getCachedNPCs()[event.getIdentifier()];
                 if (npc != null) {

@@ -31,7 +31,7 @@ public class Spell extends ClickCompare
 	public Spell(String spell)
 	{
 		this.spell = spell;
-		this.cast = (event) -> event.getMenuAction() == MenuAction.WIDGET_TYPE_2 &&
+		this.cast = (event) -> event.getMenuAction() == MenuAction.WIDGET_TARGET &&
 			event.getMenuOption().equals("Cast") &&
 			event.getMenuTarget().contains("<col=00ff00>" + spell + "</col><col=ffffff> -> ");
 		this.reset = (event) -> event.getMenuAction() == MenuAction.RUNELITE &&
@@ -232,7 +232,7 @@ public class Spell extends ClickCompare
 	@Override
 	public boolean isEntryValid(MenuEntryAdded event)
 	{
-		return event.getOpcode() == MenuAction.WIDGET_TYPE_2.getId() &&
+		return event.getOpcode() == MenuAction.WIDGET_TARGET.getId() &&
 			event.getOption().equals("Cast") &&
 			event.getTarget().equals("<col=00ff00>" + spell + "</col>");
 	}
@@ -280,7 +280,7 @@ public class Spell extends ClickCompare
 
 			if (pair.getLeft() != -1)
 			{
-				event.setMenuAction(MenuAction.ITEM_USE_ON_WIDGET);
+				event.setMenuAction(MenuAction.WIDGET_USE_ON_ITEM);
 				event.setId(pair.getLeft());
 				event.setActionParam(pair.getRight());
 				event.setWidgetId(WidgetInfo.INVENTORY.getId());

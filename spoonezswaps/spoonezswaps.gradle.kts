@@ -26,7 +26,7 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "3.0.6"
+version = "3.0.7"
 
 project.extra["PluginName"] = "[F] Ez Swaps"
 project.extra["PluginDescription"] = "SpoonLites Ez Swaps"
