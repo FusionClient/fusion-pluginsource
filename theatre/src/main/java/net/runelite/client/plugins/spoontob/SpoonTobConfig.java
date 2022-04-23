@@ -369,8 +369,49 @@ public interface SpoonTobConfig extends Config {
         return BloatIndicatorMode.TILE;
     }
 
+    @Alpha
     @ConfigItem(
             position = 2,
+            keyName = "bloatIndicatorColorUP",
+            name = "Bloat Up",
+            description = "Select a color for when Bloat is UP.",
+            section = bloat
+    )
+    default Color bloatIndicatorColorUP() {return new Color(223, 109, 255, 150);}
+
+    @Alpha
+    @ConfigItem(
+            position = 3,
+            keyName = "bloatIndicatorColorTHRESH",
+            name = "Bloat Down Warning",
+            description = "Select a color for when Bloat UP and goes over 37 ticks, which allows you to know when he can go down.",
+            section = bloat
+    )
+    default Color bloatIndicatorColorTHRESH() {return new Color(255, 200, 0, 150);}
+
+    @Alpha
+    @ConfigItem(
+            position = 4,
+            keyName = "bloatIndicatorColorDOWN",
+            name = "Bloat Down",
+            description = "Select a color for when Bloat is DOWN.",
+            section = bloat
+    )
+    default Color bloatIndicatorColorDOWN() {return new Color(0, 255, 0, 150);}
+
+    @Alpha
+    @ConfigItem(
+            position = 5,
+            keyName = "bloatIndicatorColorWARN",
+            name = "Bloat Stomp Warning",
+            description = "Select a color for when Bloat is DOWN and about to get UP.",
+            section = bloat
+    )
+    default Color bloatIndicatorColorWARN() {return new Color(255, 0, 0, 150);}
+
+
+    @ConfigItem(
+            position = 6,
             keyName = "showBloatHands",
             name = "Show Bloat Hands",
             description = "Highlights the falling hands inside Bloat.",
@@ -381,7 +422,7 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 3,
+            position = 7,
             keyName = "bloatHandsTicks",
             name = "Bloat Hands Ticks",
             description = "Shows the ticks till the hands hit the ground",
@@ -393,7 +434,7 @@ public interface SpoonTobConfig extends Config {
 
     @Alpha
     @ConfigItem(
-            position = 4,
+            position = 8,
             keyName = "bloatColor",
             name = "Hands Color",
             description = "Bloat Hands Color",
@@ -405,7 +446,7 @@ public interface SpoonTobConfig extends Config {
 
     @Range(min = 0, max = 255)
     @ConfigItem(
-            position = 5,
+            position = 9,
             keyName = "bloatColorFill",
             name = "Hands Color Opacity",
             description = "Changes the opacity of the bloat hands highlight",
@@ -416,7 +457,7 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 6,
+            position = 10,
             keyName = "bloatUpTimer",
             name = "Bloat Timer",
             description = "Show the estimated time when Bloat will stop moving.",
@@ -427,7 +468,7 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 7,
+            position = 11,
             keyName = "bloatEntryTimer",
             name = "Bloat Entry Timer",
             description = "Shows the ticks since entering the Bloat region. Disappears once you start Bloat",
@@ -438,7 +479,7 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 8,
+            position = 12,
             keyName = "hideAnnoyingAssObjects",
             name = "Hide Objects",
             description = "Hides annoying objects in the bloat room",
@@ -449,7 +490,7 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 9,
+            position = 13,
             keyName = "bloatStompMode",
             name = "Stomp Safespots",
             description = "Shows lines for where you should go to flinch bloat stomps",
@@ -460,7 +501,7 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 10,
+            position = 14,
             keyName = "bloatStompColor",
             name = "Stomp Color",
             description = "Color of the stomp lines",
@@ -472,7 +513,7 @@ public interface SpoonTobConfig extends Config {
     }
 
     @ConfigItem(
-            position = 11,
+            position = 15,
             keyName = "bloatStompWidth",
             name = "Stomp Width",
             description = "Girth",
@@ -482,9 +523,9 @@ public interface SpoonTobConfig extends Config {
     default int bloatStompWidth() {
         return 1;
     }
-
-    @ConfigItem(
-            position = 12,
+	
+	@ConfigItem(
+            position = 16,
             keyName = "bloatReverseNotifier",
             name = "Bloat Turn",
             description = "Plays a sound to let you know when bloat changes direction",
@@ -496,7 +537,7 @@ public interface SpoonTobConfig extends Config {
 
     @Range(max = 100)
     @ConfigItem(
-            position = 13,
+            position = 17,
             keyName = "reverseVolume",
             name = "Turn Volume",
             description = "Cha cha real smooth",
@@ -1080,7 +1121,7 @@ public interface SpoonTobConfig extends Config {
         return false;
     }
 
-    @Range(max = 100)
+	@Range(max = 100)
     @ConfigItem(
             position = 13,
             keyName = "sheeshVolume",
@@ -1153,7 +1194,7 @@ public interface SpoonTobConfig extends Config {
         return new Color(106, 61, 255);
     }
 
-    @Alpha
+	@Alpha
     @ConfigItem(
             position = 6,
             keyName = "p3AggroColor",
@@ -1164,8 +1205,8 @@ public interface SpoonTobConfig extends Config {
     default Color p3AggroColor() {
         return Color.RED;
     }
-
-    @ConfigItem(
+	
+	@ConfigItem(
             position = 7,
             keyName = "verzikTankTarget",
             name = "Verzik Tank Target",
@@ -1311,8 +1352,8 @@ public interface SpoonTobConfig extends Config {
     default nadoMode showVerzikNados() {
         return nadoMode.OFF;
     }
-
-    @ConfigItem(
+	
+	@ConfigItem(
             position = 21,
             keyName = "showVerzikNadoStyle",
             name = "Tornado Style",
@@ -1386,8 +1427,8 @@ public interface SpoonTobConfig extends Config {
     default int verzikRangeAttacksFill() {
         return 20;
     }
-
-    @ConfigItem(
+	
+	@ConfigItem(
             position = 28,
             keyName = "showVerzikRocks",
             name = "Show HM Verzik Rocks",
@@ -1572,8 +1613,8 @@ public interface SpoonTobConfig extends Config {
 
     @ConfigItem(
             position = 8,
-            keyName = "swapTobBuys",
-            name = "Swap value with buy 1",
+            keyName = "swapTobBuys", 
+            name = "Swap value with buy 1", 
             description = "Swap value and buy 1 on tob chest items",
             section = misc
     )
@@ -1652,8 +1693,8 @@ public interface SpoonTobConfig extends Config {
     default boolean fuckBluelite() {
         return false;
     }
-
-    @ConfigItem(
+	
+	@ConfigItem(
             keyName = "raveNylo",
             name = "Rave Nylos",
             description = "Fucking crab rave",
@@ -1663,8 +1704,8 @@ public interface SpoonTobConfig extends Config {
     default boolean raveNylo() {
         return false;
     }
-
-    @ConfigItem(
+	
+	@ConfigItem(
             keyName = "raveNados",
             name = "Rave Nados",
             description = "Just incase you cant fucking see it",
@@ -1693,9 +1734,17 @@ public interface SpoonTobConfig extends Config {
             description = "No attack here... rave",
             section = misc
     )
-    default raveLosMode raveLos() {
-        return raveLosMode.OFF;
-    }
+    default boolean raveLos() { return false; }
+
+    @ConfigItem(
+            position = 100,
+            keyName = "raveSpeed",
+            name = "Rave Speed",
+            description = "Sets the speed the overlays rave at",
+            section = misc
+    )
+    @Units(Units.MILLISECONDS)
+    default int raveSpeed() { return 6000; }
 
     @ConfigItem(
             keyName = "highlightMelee",
@@ -1921,7 +1970,7 @@ public interface SpoonTobConfig extends Config {
     // Maiden enums
     //------------------------------------------------------------//
     enum maidenBloodSplatMode {
-        OFF, COLOR, FLOW, RAVE
+        OFF, COLOR, RAVE, RAVEST
     }
 
     enum maidenFreezeTimerMode {
@@ -1932,7 +1981,7 @@ public interface SpoonTobConfig extends Config {
         OFF, CAST, ATTACK, BOTH
     }
 
-    public enum MaidenMaxHitTTMode {
+    enum MaidenMaxHitTTMode {
         OFF("Off"),
         REGULAR("Regular"),
         ELY("Elysian"),
@@ -1948,12 +1997,12 @@ public interface SpoonTobConfig extends Config {
             return this.name;
         }
 
-        private MaidenMaxHitTTMode(String name) {
+        MaidenMaxHitTTMode(String name) {
             this.name = name;
         }
     }
 
-    public enum MaidenMaxHit {
+    enum MaidenMaxHit {
         OFF("Off"),
         REGULAR("Regular"),
         ELY("Elysian"),
@@ -1969,7 +2018,7 @@ public interface SpoonTobConfig extends Config {
             return this.name;
         }
 
-        private MaidenMaxHit(String name) {
+        MaidenMaxHit(String name) {
             this.name = name;
         }
     }
@@ -1982,11 +2031,11 @@ public interface SpoonTobConfig extends Config {
     }
 
     enum bloatHandsMode{
-        OFF, COLOR, FLOW, RAVE, RAVEST
+        OFF, COLOR, RAVE, RAVEST
     }
 
     enum bloatStompMode {
-        OFF, COLOR, FLOW, RAVE
+        OFF, COLOR, RAVE
     }
 
     enum bloatTurnMode {
@@ -2140,12 +2189,8 @@ public interface SpoonTobConfig extends Config {
         OFF, DUMB, DUMBER, DUMBEST, DUMBEREST
     }
 
-    enum raveLosMode {
-        OFF, FlOW, RAVE
-    }
-
     enum raveNadoMode {
-        OFF, FlOW, RAVE
+        OFF, RAVE, RAVEST
     }
 
     //------------------------------------------------------------//

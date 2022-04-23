@@ -52,38 +52,25 @@ public class Bloat extends Room {
     @Getter
     private BloatDown bloatDown = null;
 
-    private Color[] colors;
-    @Getter
-    private Color handColor;
-    private final Random colorGenerator;
-
     @Getter
     private final HashMap<WorldPoint, Integer> bloathands;
-    public ArrayList<Color> bloathandsColors = new ArrayList<>();
 
     public static final Set<Integer> topOfTankObjectIDs = ImmutableSet.of(32958, 32962, 32964, 32965, 33062);
     public static final Set<Integer> tankObjectIDs = ImmutableSet.of(32957, 32955, 32959, 32960, 32964, 33084);
     public static final Set<Integer> ceilingChainsObjectIDs = ImmutableSet.of(32949, 32950, 32951, 32952, 32953, 32954, 32970);
-    public Color raveStompColor;
 
     public int handTicks = 4;
     public boolean handsFalling = false;
 
-    private Angle bloatOrientation = null;
-    private LocalPoint bloatPrevLoc = null;
-    private LocalPoint bloatPrevLoc2 = null;
-    private String bloatDirection = "";
-
     private static Clip clip;
+    private LocalPoint bloatPrevLoc = null;
+    private String bloatDirection = "";
 
     private boolean mirrorMode;
 
     @Inject
     protected Bloat(SpoonTobPlugin plugin, SpoonTobConfig config) {
         super(plugin, config);
-        colors = new Color[]{Color.BLUE, Color.YELLOW, Color.CYAN, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.RED, Color.PINK};
-        handColor = colors[0];
-        colorGenerator = new Random();
         bloathands = new HashMap();
     }
 
@@ -112,9 +99,7 @@ public class Bloat extends Room {
         bloatDown = null;
         handTicks = 4;
         handsFalling = false;
-        bloatOrientation = null;
         bloatPrevLoc = null;
-        bloatPrevLoc2 = null;
         bloatDirection = "";
     }
 
@@ -139,13 +124,23 @@ public class Bloat extends Room {
     }
 
     @Subscribe
+    public void onAnimationChanged(AnimationChanged event)
+    {
+        if (client.getGameState() != GameState.LOGGED_IN || event.getActor() != bloatNPC)
+        {
+            return;
+        }
+
+        bloatUpTimer = 0;
+    }
+
+    @Subscribe
     protected void onGraphicsObjectCreated(GraphicsObjectCreated graphicsObjectC) {
         if (bloatActive) {
             GraphicsObject graphicsObject = graphicsObjectC.getGraphicsObject();
             if (graphicsObject.getId() >= 1560 && graphicsObject.getId() <= 1590) {
                 WorldPoint point = WorldPoint.fromLocal(client, graphicsObject.getLocation());
                 if (!bloathands.containsKey(point)) {
-                    bloathandsColors.add(Color.getHSBColor(new Random().nextFloat(), 1.0F, 1.0F));
                     bloathands.put(point, 4);
 
                     if(!handsFalling) {
@@ -278,20 +273,90 @@ public class Bloat extends Room {
                     handsFalling = false;
                 }
             }
-            bloathandsColors.clear();
-            for(int i=0; i<bloathands.size(); i++){
-                bloathandsColors.add(Color.getHSBColor(new Random().nextFloat(), 1.0F, 1.0F));
-            }
-            handColor = colors[colorGenerator.nextInt(colors.length)];
-            raveStompColor = Color.getHSBColor(new Random().nextFloat(), 1.0F, 1.0F);
+            bloatDownCount++;
+            bloatUpTimer++;
 
-            ++bloatDownCount;
-            bloathands.values().removeIf((v) -> v <= 0);
+            bloathands.values().removeIf(v -> v <= 0);
             bloathands.replaceAll((k, v) -> v - 1);
+
+            if (bloatNPC.getAnimation() == -1) // 1 = UP, 2 = DOWN, 3 = WARN, 4 = PAST THRESHOLD;
+            {
+                bloatDownCount = 0;
+                if (bloatNPC.getHealthScale() == 0)
+                {
+                    bloatState = 2;
+                }
+                else if (bloatUpTimer >= 38)
+                {
+                    bloatState = 4;
+                }
+                else
+                {
+                    bloatState = 1;
+                }
+            }
+            else
+            {
+                if (bloatUpTimer >= 38)
+                {
+                    bloatState = 4;
+                }
+                else if (25 < bloatDownCount && bloatDownCount < 35)
+                {
+                    bloatState = 3;
+                }
+                else if (bloatDownCount < 26)
+                {
+                    bloatState = 2;
+                }
+                else if (bloatNPC.getModelHeight() == 568)
+                {
+                    bloatState = 2;
+                }
+                else
+                {
+                    if (bloatUpTimer >= 38)
+                    {
+                        bloatState = 4;
+                    }
+                    else
+                    {
+                        bloatState = 1;
+                    }
+                }
+            }
+
+            if (bloatNPC != null)
+            {
+                if (bloatNPC.getAnimation() == -1 && bloatDown != null)
+                {
+                    //log.debug("Nulling the old 'Bloat Down'");
+                    bloatDown = null;
+                }
+                else if (bloatNPC.getAnimation() != -1 && bloatDown == null && !bloatNPC.isDead())
+                {
+                    //log.debug("Building a new 'Bloat Down'");
+                    WorldPoint sw = bloatNPC.getWorldLocation();
+                    Direction dir = (new Angle(bloatNPC.getOrientation())).getNearestDirection();
+                    Supplier<BloatChunk> chunk = () -> {
+                        LocalPoint lp = LocalPoint.fromWorld(client, sw);
+                        if (lp != null && client.isInInstancedRegion())
+                        {
+                            int zone = client.getInstanceTemplateChunks()[0][lp.getSceneX() >> 3][lp.getSceneY() >> 3];
+                            return BloatChunk.getOccupiedChunk(zone);
+                        }
+                        else
+                        {
+                            return BloatChunk.UNKNOWN;
+                        }
+                    };
+                    bloatDown = new BloatDown(client, sw, dir, chunk.get());
+                }
+            }
 
             if(bloatActive && bloatNPC != null && config.bloatReverseNotifier() != SpoonTobConfig.bloatTurnMode.OFF){
                 LocalPoint lp = LocalPoint.fromWorld(client, bloatNPC.getWorldLocation());
-                if (bloatPrevLoc != null) {
+                if (bloatPrevLoc != null && lp != null) {
                     boolean changed = false;
                     if (lp.getX() > bloatPrevLoc.getX()) {
                         if (bloatDirection.equals("W")) {
@@ -326,109 +391,67 @@ public class Bloat extends Room {
                 }
                 bloatPrevLoc = lp;
             }
-
-            if (bloatNPC.getAnimation() == -1) {
-                bloatDownCount = 0;
-                ++bloatUpTimer;
-                if (bloatNPC.getHealthScale() == 0) {
-                    bloatState = 2;
-                    bloatDown = null;
-                } else {
-                    bloatState = 1;
-                }
-            } else if (25 < bloatDownCount && bloatDownCount < 35) {
-                bloatState = 3;
-                WorldPoint sw = bloatNPC.getWorldLocation();
-                Direction dir = (new Angle(bloatNPC.getOrientation())).getNearestDirection();
-                Supplier<BloatChunk> chunk = () -> {
-                    LocalPoint lp = LocalPoint.fromWorld(client, sw);
-                    if (lp != null && client.isInInstancedRegion()) {
-                        int zone = client.getInstanceTemplateChunks()[0][lp.getSceneX() >> 3][lp.getSceneY() >> 3];
-                        return BloatChunk.getOccupiedChunk(zone);
-                    } else {
-                        return BloatChunk.UNKNOWN;
-                    }
-                };
-                bloatDown = new BloatDown(client, sw, dir, chunk.get());
-            } else if (bloatDownCount < 26) {
-                bloatUpTimer = 0;
-                bloatState = 2;
-                WorldPoint sw = bloatNPC.getWorldLocation();
-                Direction dir = (new Angle(bloatNPC.getOrientation())).getNearestDirection();
-                Supplier<BloatChunk> chunk = () -> {
-                    LocalPoint lp = LocalPoint.fromWorld(client, sw);
-                    if (lp != null && client.isInInstancedRegion()) {
-                        int zone = client.getInstanceTemplateChunks()[0][lp.getSceneX() >> 3][lp.getSceneY() >> 3];
-                        return BloatChunk.getOccupiedChunk(zone);
-                    } else {
-                        return BloatChunk.UNKNOWN;
-                    }
-                };
-                bloatDown = new BloatDown(client, sw, dir, chunk.get());
-            } else if (bloatNPC.getModelHeight() == 568) {
-                bloatUpTimer = 0;
-                bloatState = 2;
-                WorldPoint sw = bloatNPC.getWorldLocation();
-                Direction dir = (new Angle(bloatNPC.getOrientation())).getNearestDirection();
-                Supplier<BloatChunk> chunk = () -> {
-                    LocalPoint lp = LocalPoint.fromWorld(client, sw);
-                    if (lp != null && client.isInInstancedRegion()) {
-                        int zone = client.getInstanceTemplateChunks()[0][lp.getSceneX() >> 3][lp.getSceneY() >> 3];
-                        return BloatChunk.getOccupiedChunk(zone);
-                    } else {
-                        return BloatChunk.UNKNOWN;
-                    }
-                };
-                bloatDown = new BloatDown(client, sw, dir, chunk.get());
-            } else {
-                bloatState = 1;
-            }
         }
     }
 
-    Polygon getBloatTilePoly() {
-        if (bloatNPC == null) {
+    Polygon getBloatTilePoly()
+    {
+        if (bloatNPC == null)
+        {
             return null;
-        } else {
-            int size = 1;
-            NPCComposition composition = bloatNPC.getTransformedComposition();
-            if (composition != null) {
-                size = composition.getSize();
-            }
-
-            LocalPoint lp = null;
-            switch(bloatState) {
-                case 1:
-                    lp = bloatNPC.getLocalLocation();
-                    if (lp == null) {
-                        return null;
-                    }
-
-                    return RoomOverlay.getCanvasTileAreaPoly(client, lp, size, true);
-                case 2:
-                case 3:
-                    lp = LocalPoint.fromWorld(client, bloatNPC.getWorldLocation());
-                    if (lp == null) {
-                        return null;
-                    }
-
-                    return RoomOverlay.getCanvasTileAreaPoly(client, lp, size, false);
-                default:
-                    return null;
-            }
         }
+
+        int size = 1;
+        NPCComposition composition = bloatNPC.getTransformedComposition();
+        if (composition != null)
+        {
+            size = composition.getSize();
+        }
+
+        LocalPoint lp;
+
+        switch (bloatState)
+        {
+            case 1:
+            case 4:
+                lp = bloatNPC.getLocalLocation();
+
+                if (lp == null)
+                {
+                    return null;
+                }
+
+                return RoomOverlay.getCanvasTileAreaPoly(client, lp, size, true);
+            case 2:
+            case 3:
+                lp = LocalPoint.fromWorld(client, bloatNPC.getWorldLocation());
+
+                if (lp == null)
+                {
+                    return null;
+                }
+
+                return RoomOverlay.getCanvasTileAreaPoly(client, lp, size, false);
+        }
+
+        return null;
     }
 
-    Color getBloatStateColor() {
-        Color col = new Color(223, 109, 255);
-        switch(bloatState) {
+    Color getBloatStateColor()
+    {
+        Color col = config.bloatIndicatorColorUP();
+        switch (bloatState)
+        {
             case 2:
-                col = Color.GREEN;
+                col = config.bloatIndicatorColorDOWN();
                 break;
             case 3:
-                col = Color.YELLOW;
+                col = config.bloatIndicatorColorWARN();
+                break;
+            case 4:
+                col = config.bloatIndicatorColorTHRESH();
+                break;
         }
-
         return col;
     }
 

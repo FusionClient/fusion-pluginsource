@@ -70,7 +70,7 @@ public class NylocasOverlay extends RoomOverlay {
                 if (config.showNylocasExplosions() != SpoonTobConfig.ExplosionWarning.OFF || config.getHighlightMageNylo() || config.getHighlightMeleeNylo()
                         || config.getHighlightRangeNylo() || config.nyloAggressiveOverlay() != SpoonTobConfig.aggroStyle.OFF) {
                     HashMap<NPC, Integer> npcMap = nylocas.getNylocasNpcs();
-                    int meleeIndex = 0;
+				    int meleeIndex = 0;
                     int rangeIndex = 0;
                     int mageIndex = 0;
 
@@ -222,27 +222,27 @@ public class NylocasOverlay extends RoomOverlay {
     }
 
     public void drawNylocas(Graphics2D graphics) {
-        NPC npc = null;
-        if(nylocas.minibossAlive && nylocas.nyloMiniboss != null && config.showPhaseChange() == SpoonTobConfig.nyloBossPhaseChange.BOTH){
-            npc = nylocas.nyloMiniboss;
-        }else if(nylocas.getNylocasBoss() != null){
-            npc = nylocas.getNylocasBoss();
-        }
-
+		NPC npc = null;
+		if(nylocas.minibossAlive && nylocas.nyloMiniboss != null && config.showPhaseChange() == SpoonTobConfig.nyloBossPhaseChange.BOTH){
+			npc = nylocas.nyloMiniboss;
+		}else if(nylocas.getNylocasBoss() != null){
+			npc = nylocas.getNylocasBoss();
+		}
+		
         if (npc != null){
-            LocalPoint lp = npc.getLocalLocation();
-            if (lp != null) {
-                String str = Integer.toString(nylocas.getBossChangeTicks());
-                Point loc = Perspective.getCanvasTextLocation(client, graphics, lp, str, 0);
-                if (loc != null) {
-                    if (config.fontStyle()){
-                        renderTextLocation(graphics, str, Color.WHITE, loc);
-                    } else {
-                        renderResizeTextLocation(graphics, str, 14, Font.BOLD, Color.WHITE, loc);
-                    }
-                }
-            }
-        }
+			LocalPoint lp = npc.getLocalLocation();
+			if (lp != null) {
+				String str = Integer.toString(nylocas.getBossChangeTicks());
+				Point loc = Perspective.getCanvasTextLocation(client, graphics, lp, str, 0);
+				if (loc != null) {
+					if (config.fontStyle()){
+						renderTextLocation(graphics, str, Color.WHITE, loc);
+					} else {
+						renderResizeTextLocation(graphics, str, 14, Font.BOLD, Color.WHITE, loc);
+					}
+				}
+			}
+		}
     }
 
     protected void renderPolygon(Graphics2D graphics, @Nullable Shape polygon, @Nonnull Color color) {

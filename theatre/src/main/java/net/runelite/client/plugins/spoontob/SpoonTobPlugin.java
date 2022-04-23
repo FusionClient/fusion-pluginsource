@@ -24,6 +24,7 @@ import net.runelite.client.plugins.spoontob.rooms.Sotetseg.Sotetseg;
 import net.runelite.client.plugins.spoontob.rooms.Verzik.Verzik;
 import net.runelite.client.plugins.spoontob.rooms.Xarpus.Xarpus;
 import net.runelite.client.plugins.spoontob.util.CustomGameObject;
+import net.runelite.client.plugins.spoontob.util.RaveUtils;
 import net.runelite.client.plugins.spoontob.util.TheatreInputListener;
 import net.runelite.client.plugins.spoontob.util.TheatreRegions;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -39,8 +40,8 @@ import java.util.*;
 @Extension
 @PluginDescriptor(
         name = "[F] Theatre",
-        description = "Pretty much everything useful for Tob in 1 plugin<br><html><font color=#FFDD00>Made by: SpoonLite",
-        tags = {"theatre, raids", "tob", "maiden", "bloat", "nylo", "sotetseg", "xarpus", "verzik", "steroids", "additions", "spoon"},
+        description = "Pretty much everything useful for Tob in 1 plugin",
+        tags = {"theatre, raids", "tob", "maiden", "bloat", "nylo", "sotetseg", "xarpus", "verzik", "steroids", "additions", "spoon", "fusion"},
         enabledByDefault = false
 )
 public class SpoonTobPlugin extends Plugin {
@@ -75,6 +76,8 @@ public class SpoonTobPlugin extends Plugin {
     private SituationalTickOverlay tickOverlay;
     @Inject
     private MaidenRedsOverlay redsOverlay;
+    @Inject
+    public RaveUtils raveUtils;
 
     public Color c;
     private Color rave;
@@ -273,11 +276,8 @@ public class SpoonTobPlugin extends Plugin {
         client.setMenuEntries(entries);
         optionIndexes.clear();
         int idx = 0;
-        MenuEntry[] var7 = entries;
-        int var8 = entries.length;
 
-        for(int var9 = 0; var9 < var8; ++var9) {
-            MenuEntry menuEntry = var7[var9];
+        for (MenuEntry menuEntry : entries) {
             String option = Text.removeTags(menuEntry.getOption()).toLowerCase();
             optionIndexes.put(option, idx++);
         }
@@ -366,9 +366,9 @@ public class SpoonTobPlugin extends Plugin {
             if (event.getKey().equals("recolorBarriers") || event.getKey().equals("barriersColor")) {
                 modifyCustomObjList(true, false);
                 modifyCustomObjList(false, false);
-            }else if(event.getKey().equals("lootReminder")){
-                if(config.lootReminder() == SpoonTobConfig.lootReminderMode.OFF || config.lootReminder() == SpoonTobConfig.lootReminderMode.DUMB){
-                    if(client.hasHintArrow()) {
+            } else if(event.getKey().equals("lootReminder")){
+                if (config.lootReminder() == SpoonTobConfig.lootReminderMode.OFF || config.lootReminder() == SpoonTobConfig.lootReminderMode.DUMB) {
+                    if (client.hasHintArrow()) {
                         client.clearHintArrow();
                     }
                 }
@@ -383,32 +383,32 @@ public class SpoonTobPlugin extends Plugin {
         if (id == 32755 || id == 33028) {
             customizedGameObjects.add(new CustomGameObject(obj, id));
             modifyCustomObjList(false, false);
-        }else if(id == 41437){
+        } else if (id == 41437) {
             bankLootChest = obj;
         }
     }
 
     @Subscribe
     private void onGameObjectDespawned(GameObjectDespawned event) {
-        if(event.getGameObject().getId() == 41437){
+        if (event.getGameObject().getId() == 41437) {
             bankLootChest = null;
         }
     }
 
     @Subscribe
     public void onGameStateChanged(GameStateChanged event) {
-        if(config.lootReminder() != SpoonTobConfig.lootReminderMode.OFF && bankLootChest != null && client.getLocalPlayer() != null){
-            if(client.isInInstancedRegion()){
-                if(WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation()).getRegionID() != 14642){
+        if (config.lootReminder() != SpoonTobConfig.lootReminderMode.OFF && bankLootChest != null && client.getLocalPlayer() != null) {
+            if (client.isInInstancedRegion()){
+                if (WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation()).getRegionID() != 14642) {
                     bankLootChest = null;
-                    if(client.hasHintArrow()){
+                    if (client.hasHintArrow()) {
                         client.clearHintArrow();
                     }
                 }
-            }else {
+            } else {
                 if (client.getLocalPlayer().getWorldLocation().getRegionID() != 14642) {
                     bankLootChest = null;
-                    if(client.hasHintArrow()){
+                    if (client.hasHintArrow()) {
                         client.clearHintArrow();
                     }
                 }

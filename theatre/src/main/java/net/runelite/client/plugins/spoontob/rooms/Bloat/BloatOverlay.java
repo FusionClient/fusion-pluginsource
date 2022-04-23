@@ -31,9 +31,9 @@ public class BloatOverlay extends RoomOverlay {
         if(bloat.isBloatActive()) {
             if (config.bloatIndicator() != SpoonTobConfig.BloatIndicatorMode.OFF) {
                 if (config.bloatIndicator() == SpoonTobConfig.BloatIndicatorMode.TILE) {
-                    renderNpcOverlay(graphics, bloat.getBloatNPC(), bloat.getBloatStateColor(), 3, 150, 0);
+                    renderNpcPoly(graphics, bloat.getBloatStateColor(), bloat.getBloatTilePoly(), 3, bloat.getBloatStateColor().getAlpha());
                 } else if (config.bloatIndicator() == SpoonTobConfig.BloatIndicatorMode.TRUE_LOCATION) {
-                    renderNpcTLOverlay(graphics, bloat.getBloatNPC(), bloat.getBloatStateColor(), 3, 150, 0);
+                    renderNpcTLOverlay(graphics, bloat.getBloatNPC(), bloat.getBloatStateColor(), 3, bloat.getBloatStateColor().getAlpha(), 0);
                 }
             }
 
@@ -42,11 +42,9 @@ public class BloatOverlay extends RoomOverlay {
                 Color color = config.bloatHandColor();
                 for (WorldPoint point : bloat.getBloathands().keySet()) {
                     if (config.showBloatHands() == SpoonTobConfig.bloatHandsMode.RAVE) {
-                        color = bloat.getHandColor();
+                        color = plugin.raveUtils.getColor(bloat.getBloathands().hashCode(), true);
                     } else if (config.showBloatHands() == SpoonTobConfig.bloatHandsMode.RAVEST) {
-                        color = bloat.bloathandsColors.get(index);
-                    } else if (config.showBloatHands() == SpoonTobConfig.bloatHandsMode.FLOW) {
-                        color = plugin.flowColor;
+                        color = plugin.raveUtils.getColor(index * 50, false);
                     }
                     drawTile(graphics, point, color, 1, config.bloatHandColor().getAlpha(), config.bloatColorFill());
 
@@ -58,7 +56,7 @@ public class BloatOverlay extends RoomOverlay {
                             if (config.fontStyle()) {
                                 renderTextLocation(graphics, text, Color.WHITE, p);
                             } else {
-                                renderSteroidsTextLocation(graphics, text, 12, 1, Color.WHITE, p);
+                                renderSteroidsTextLocation(graphics, text, 12, Font.BOLD, Color.WHITE, p);
                             }
                         }
                     }
@@ -69,19 +67,19 @@ public class BloatOverlay extends RoomOverlay {
             if (bloat.bloatVar == 1) {
                 if (config.bloatUpTimer() && bloat != null) {
                     Point canvasPoint = bloat.getBloatNPC().getCanvasTextLocation(graphics, String.valueOf(bloat.getBloatUpTimer()), 60);
-                    if (bloat.getBloatState() != 1) {
+                    if (bloat.getBloatState() != 1 && bloat.getBloatState() != 4) {
                         String str = String.valueOf(33 - bloat.getBloatDownCount());
                         if (bloat.getBloatDownCount() >= 26) {
                             if (config.fontStyle()) {
                                 renderTextLocation(graphics, str, Color.RED, canvasPoint);
                             } else {
-                                renderSteroidsTextLocation(graphics, str, 15, 1, Color.RED, canvasPoint);
+                                renderResizeTextLocation(graphics, str, 15, Font.BOLD, Color.RED, canvasPoint);
                             }
                         } else {
                             if (config.fontStyle()) {
                                 renderTextLocation(graphics, str, Color.WHITE, canvasPoint);
                             } else {
-                                renderSteroidsTextLocation(graphics, str, 15, 1, Color.WHITE, canvasPoint);
+                                renderResizeTextLocation(graphics, str, 15, Font.BOLD, Color.WHITE, canvasPoint);
                             }
                         }
                     } else {
@@ -91,7 +89,7 @@ public class BloatOverlay extends RoomOverlay {
                         } else {
                             //int secondConversion = (int)((double)bloat.getBloatUpTimer() * 0.6D);
                             //renderTextLocation(graphics, bloat.getBloatUpTimer() + "( " + secondConversion + " )", 15, 1, col, canvasPoint);
-                            renderSteroidsTextLocation(graphics, String.valueOf(bloat.getBloatUpTimer()), 15, 1, col, canvasPoint);
+                            renderResizeTextLocation(graphics, String.valueOf(bloat.getBloatUpTimer()), 15, Font.BOLD, col, canvasPoint);
                         }
                     }
                 }
@@ -102,7 +100,7 @@ public class BloatOverlay extends RoomOverlay {
                     if (config.fontStyle()) {
                         renderTextLocation(graphics, String.valueOf(bloat.getBloatUpTimer()), col, canvasPoint);
                     } else {
-                        renderSteroidsTextLocation(graphics, String.valueOf(bloat.getBloatUpTimer()), 15, 1, col, canvasPoint);
+                        renderResizeTextLocation(graphics, String.valueOf(bloat.getBloatUpTimer()), 15, Font.BOLD, col, canvasPoint);
                     }
                 }
             }
@@ -122,9 +120,7 @@ public class BloatOverlay extends RoomOverlay {
             safespot.getSafespotLines().forEach((line) -> {
                 Color color = config.bloatStompColor();
                 if (config.bloatStompMode() == SpoonTobConfig.bloatStompMode.RAVE){
-                    color = bloat.raveStompColor;
-                } else if (config.bloatStompMode() == SpoonTobConfig.bloatStompMode.FLOW) {
-                    color = plugin.flowColor;
+                    color = plugin.raveUtils.getColor(line.hashCode(), true);
                 }
                 drawLine(graphics, line, color, config.bloatStompWidth());
             });

@@ -21,7 +21,6 @@ import net.runelite.client.plugins.spoontob.util.TheatreInputListener;
 import net.runelite.client.plugins.spoontob.util.TheatreRegions;
 import net.runelite.client.plugins.spoontob.util.WeaponMap;
 import net.runelite.client.plugins.spoontob.util.WeaponStyle;
-import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.components.InfoBoxComponent;
 import net.runelite.client.util.ColorUtil;
 import org.apache.commons.lang3.ObjectUtils;
@@ -57,7 +56,7 @@ public class Nylocas extends Room {
 
     private static final int NPCID_NYLOCAS_PILLAR = 8358;
     private static final int NPCID_NYLOCAS_SM_PILLAR = 10790;
-    private static final int NPCID_NYLOCAS_HM_PILLAR = 10811;
+	private static final int NPCID_NYLOCAS_HM_PILLAR = 10811;
     private static final int NYLO_MAP_REGION = 13122;
     private static final int BLOAT_MAP_REGION = 13125;
     private static final String MAGE_NYLO = "Nylocas Hagios";
@@ -161,22 +160,22 @@ public class Nylocas extends Room {
     private final Set<NPC> bigNylos = new HashSet<>();
 
     public boolean showHint;
-
-    public final ArrayList<Color> meleeNyloRaveColors = new ArrayList<Color>();
+	
+	public final ArrayList<Color> meleeNyloRaveColors = new ArrayList<Color>();
     public final ArrayList<Color> rangeNyloRaveColors = new ArrayList<Color>();
     public final ArrayList<Color> mageNyloRaveColors = new ArrayList<Color>();
 
     public String tobMode = "";
-    public boolean minibossAlive = false;
-    public NPC nyloMiniboss = null;
+	public boolean minibossAlive = false;
+	public NPC nyloMiniboss = null;
     public String nyloBossStyle = "";
+	
+	public int logTicks = 0;
 
-    public int logTicks = 0;
+	public int waveSpawnTicks = 0;
+	public boolean stalledWave = false;
 
-    public int waveSpawnTicks = 0;
-    public boolean stalledWave = false;
-
-    private boolean mirrorMode;
+	private boolean mirrorMode;
     private boolean setAlive;
 
     private WeaponStyle weaponStyle;
@@ -207,11 +206,11 @@ public class Nylocas extends Room {
         nylocasAliveCounterOverlay.setMaxNyloAlive(12);
         nyloBossAlive = false;
         tobMode = "";
-        minibossAlive = false;
-        nyloMiniboss = null;
-        nyloBossStyle = "";
-        waveSpawnTicks = 0;
-        stalledWave = false;
+		minibossAlive = false;
+		nyloMiniboss = null;
+		nyloBossStyle = "";
+		waveSpawnTicks = 0;
+		stalledWave = false;
     }
 
     private void startupNyloOverlay() {
@@ -258,9 +257,9 @@ public class Nylocas extends Room {
         nyloWaveStart = null;
         nyloActive = false;
         tobMode = "";
-        minibossAlive = false;
+		minibossAlive = false;
         nyloBossStyle = "";
-        logTicks = 0;
+		logTicks = 0;
         waveSpawnTicks = 0;
         stalledWave = false;
         weaponStyle = null;
@@ -284,12 +283,12 @@ public class Nylocas extends Room {
         bigNylos.clear();
 
         tobMode = "";
-        minibossAlive = false;
-        nyloMiniboss = null;
+		minibossAlive = false;
+		nyloMiniboss = null;
         nyloBossStyle = "";
-        logTicks = 0;
-        waveSpawnTicks = 0;
-        stalledWave = false;
+		logTicks = 0;
+		waveSpawnTicks = 0;
+		stalledWave = false;
     }
 
     private void setNyloWave(int wave) {
@@ -405,19 +404,19 @@ public class Nylocas extends Room {
             case NYLOCAS_PRINKIPAS_10805:
             case NYLOCAS_PRINKIPAS_10806:
                 if (nyloActive) {
-                    if (npc.getId() == NYLOCAS_PRINKIPAS_10804){
-                        minibossAlive = true;
-                        nyloMiniboss = npc;
-                        bossChangeTicks = 10;
-                    } else {
-                        nylocasNpcs.put(npc, 52);
-                    }
-
-                    if (minibossAlive) {
-                        nylocasAliveCounterOverlay.setNyloAlive(nylocasNpcs.size() + 3);
-                    } else {
-                        nylocasAliveCounterOverlay.setNyloAlive(nylocasNpcs.size());
-                    }
+					if (npc.getId() == NYLOCAS_PRINKIPAS_10804){
+						minibossAlive = true;
+						nyloMiniboss = npc;
+						bossChangeTicks = 10;
+					} else {
+						nylocasNpcs.put(npc, 52);
+					}
+					
+					if (minibossAlive) {
+						nylocasAliveCounterOverlay.setNyloAlive(nylocasNpcs.size() + 3);
+					} else {
+						nylocasAliveCounterOverlay.setNyloAlive(nylocasNpcs.size());
+					}
                     NyloNPC nyloNPC = matchNpc(npc);
                     if (nyloNPC != null) {
                         currentWave.put(nyloNPC, npc);
@@ -461,7 +460,7 @@ public class Nylocas extends Room {
                 break;
             case NPCID_NYLOCAS_PILLAR:
             case NPCID_NYLOCAS_SM_PILLAR: //Story Mode
-            case NPCID_NYLOCAS_HM_PILLAR: //Hard Mode
+			case NPCID_NYLOCAS_HM_PILLAR: //Hard Mode
                 nyloActive = true;
                 showHint = true;
                 if (nylocasPillars.size() > 3) {
@@ -476,8 +475,8 @@ public class Nylocas extends Room {
                 } else if (npc.getId() == NPCID_NYLOCAS_SM_PILLAR){
                     tobMode = "story";
                 } else {
-                    tobMode = "normal";
-                }
+					tobMode = "normal";
+				}
 
                 mageSplits = 0;
                 rangeSplits = 0;
@@ -551,9 +550,9 @@ public class Nylocas extends Room {
             if (NYLO_DEMI_BOSS_IDS.contains(id)) {
                 nyloMiniboss = npc;
             }
-        }
-
-        if (id == NYLOCAS_VASILIAS_8355 || id == NYLOCAS_VASILIAS_10787 || id == NYLOCAS_VASILIAS_10808) {
+        } 
+		
+		if (id == NYLOCAS_VASILIAS_8355 || id == NYLOCAS_VASILIAS_10787 || id == NYLOCAS_VASILIAS_10808) {
             meleeBoss++;
             nyloBossStyle = "melee";
         } else if (id == NYLOCAS_VASILIAS_8356 || id == NYLOCAS_VASILIAS_10788 || id == NYLOCAS_VASILIAS_10809) {
@@ -675,17 +674,17 @@ public class Nylocas extends Room {
             case NYLOCAS_PRINKIPAS_10805:
             case NYLOCAS_PRINKIPAS_10806:
                 if (nylocasNpcs.remove(npc) != null || NYLO_DEMI_BOSS_IDS.contains(id)) {
-                    if (NYLO_DEMI_BOSS_IDS.contains(id)) {
-                        nyloMiniboss = null;
-                        minibossAlive = false;
-                        bossChangeTicks = -1;
-                    }
-
-                    if (minibossAlive) {
-                        nylocasAliveCounterOverlay.setNyloAlive(nylocasNpcs.size() + 3);
-                    } else {
-                        nylocasAliveCounterOverlay.setNyloAlive(nylocasNpcs.size());
-                    }
+					if (NYLO_DEMI_BOSS_IDS.contains(id)) {
+						nyloMiniboss = null;
+						minibossAlive = false;
+						bossChangeTicks = -1;
+					}
+					
+					if (minibossAlive) {
+						nylocasAliveCounterOverlay.setNyloAlive(nylocasNpcs.size() + 3);
+					} else {
+						nylocasAliveCounterOverlay.setNyloAlive(nylocasNpcs.size());
+					}
                 }
 
                 aggressiveNylocas.remove(npc);
@@ -872,17 +871,17 @@ public class Nylocas extends Room {
 
             ticksSinceLastWave = Math.max(0, ticksSinceLastWave - 1);
 
-            if (nylocasBoss != null && nyloBossAlive) {
-                bossChangeTicks--;
-                if (nylocasBoss.getId() != lastBossId) {
-                    lastBossId = nylocasBoss.getId();
-                    if (nylocasBoss.getId() == 10787 || nylocasBoss.getId() == 10788 || nylocasBoss.getId() == 10789) {
-                        bossChangeTicks = 15;
-                    } else {
-                        bossChangeTicks = 10;
-                    }
-                }
-            } else if (minibossAlive && nyloMiniboss != null){
+			if (nylocasBoss != null && nyloBossAlive) {
+				bossChangeTicks--;
+				if (nylocasBoss.getId() != lastBossId) {
+					lastBossId = nylocasBoss.getId();
+					if (nylocasBoss.getId() == 10787 || nylocasBoss.getId() == 10788 || nylocasBoss.getId() == 10789) {
+						bossChangeTicks = 15;
+					} else {
+						bossChangeTicks = 10;
+					}
+				}
+			} else if (minibossAlive && nyloMiniboss != null){
                 bossChangeTicks--;
             }
 
@@ -975,20 +974,20 @@ public class Nylocas extends Room {
 
     @Subscribe
     public void onMenuOptionClicked(MenuOptionClicked event) {
-        if (event.getMenuAction() == MenuAction.ITEM_SECOND_OPTION) {
-            WeaponStyle newStyle = WeaponMap.StyleMap.get(event.getId());
+        if (event.getMenuOption().equalsIgnoreCase("wield")) {
+            WeaponStyle newStyle = WeaponMap.StyleMap.get(event.getItemId());
             if (newStyle != null) {
                 skipTickCheck = true;
                 weaponStyle = newStyle;
             }
         } else if ((config.wheelchairNylo() == SpoonTobConfig.wheelchairMode.BOSS || config.wheelchairNylo() == SpoonTobConfig.wheelchairMode.BOTH)
-                && nylocasBoss != null && event.getMenuTarget().contains(BOSS_NYLO) && event.getMenuAction() == MenuAction.NPC_SECOND_OPTION && weaponStyle != null) {
+                && nylocasBoss != null && event.getMenuTarget().contains(BOSS_NYLO) && event.getMenuOption().equalsIgnoreCase("attack") && weaponStyle != null) {
             switch (weaponStyle) {
                 case TRIDENTS:
                 case MAGIC:
                     if (nylocasBoss.getId() != NYLOCAS_VASILIAS_8356 && nylocasBoss.getId() != NYLOCAS_VASILIAS_10788
                             && nylocasBoss.getId() != NYLOCAS_VASILIAS_10809) {
-                        event.consume();
+                       event.consume();
                     }
                     break;
                 case MELEE:
@@ -1011,8 +1010,9 @@ public class Nylocas extends Room {
     public void onMenuEntryAdded(MenuEntryAdded entry) {
         if (nyloActive) {
             String target = entry.getTarget();
+            String option = entry.getOption();
 
-            if (config.nyloRecolorMenu() && (entry.getType() == MenuAction.NPC_SECOND_OPTION.getId() || entry.getType() == MenuAction.WIDGET_TARGET_ON_NPC.getId())) {
+            if (config.nyloRecolorMenu() && (option.equalsIgnoreCase("attack") || entry.getType() == MenuAction.WIDGET_TARGET_ON_NPC.getId())) {
                 MenuEntry[] entries = client.getMenuEntries();
                 MenuEntry toEdit = entries[entries.length - 1];
 
@@ -1058,7 +1058,7 @@ public class Nylocas extends Room {
             }
 
             if ((config.wheelchairNylo() == SpoonTobConfig.wheelchairMode.WAVES || config.wheelchairNylo() == SpoonTobConfig.wheelchairMode.BOTH)
-                    && entry.getType() == MenuAction.NPC_SECOND_OPTION.getId() && weaponStyle != null) {
+                    && option.equalsIgnoreCase("attack") && weaponStyle != null) {
                 switch (weaponStyle) {
                     case TRIDENTS:
                         if (target.contains(MELEE_NYLO) || target.contains(RANGE_NYLO)) {
@@ -1095,7 +1095,7 @@ public class Nylocas extends Room {
             }
 
             if ((config.wheelchairNylo() == SpoonTobConfig.wheelchairMode.BOSS || config.wheelchairNylo() == SpoonTobConfig.wheelchairMode.BOTH)
-                    && nyloMiniboss != null && target.contains(DEMIBOSS_NYLO) && entry.getType() == MenuAction.NPC_SECOND_OPTION.getId() && weaponStyle != null) {
+                    && nyloMiniboss != null && target.contains(DEMIBOSS_NYLO) && option.equalsIgnoreCase("attack") && weaponStyle != null) {
                 switch (weaponStyle) {
                     case TRIDENTS:
                     case MAGIC:

@@ -152,10 +152,10 @@ public class MaidenOverlay extends RoomOverlay {
                 for (int i = 0; i < maiden.getMaidenBloodSplatters().size(); i++) {
                     WorldPoint wp = maiden.getMaidenBloodSplatters().get(i);
                     Color color = config.bloodTossColour();
-                    if (config.maidenBlood() == SpoonTobConfig.maidenBloodSplatMode.RAVE) {
-                        color = maiden.maidenBloodSplattersColors.get(i);
-                    } else if (config.maidenBlood() == SpoonTobConfig.maidenBloodSplatMode.FLOW) {
-                        color = plugin.flowColor;
+                    if (config.maidenBlood() == SpoonTobConfig.maidenBloodSplatMode.RAVEST) {
+                        color = plugin.raveUtils.getColor(i * 50, false);
+                    } else if (config.maidenBlood() == SpoonTobConfig.maidenBloodSplatMode.RAVE) {
+                        color = plugin.raveUtils.getColor(maiden.getMaidenBloodSplatters().hashCode(), true);
                     }
                     drawTile(graphics, wp, color, 1, config.bloodTossColour().getAlpha(), config.bloodTossFill());
                 }
@@ -170,7 +170,7 @@ public class MaidenOverlay extends RoomOverlay {
                         if (config.fontStyle()) {
                             renderTextLocation(graphics, text, col, canvasPoint);
                         } else {
-                            renderSteroidsTextLocation(graphics, text, 14, 1, col, canvasPoint);
+                            renderSteroidsTextLocation(graphics, text, 14, Font.BOLD, col, canvasPoint);
                         }
                     }
                 }
@@ -195,7 +195,7 @@ public class MaidenOverlay extends RoomOverlay {
                     if (config.fontStyle()) {
                         renderTextLocation(graphics, text, col, canvasPoint);
                     } else {
-                        renderSteroidsTextLocation(graphics, text, 14, 1, col, canvasPoint);
+                        renderResizeTextLocation(graphics, text, 14, Font.BOLD, col, canvasPoint);
                     }
                 }
             }
@@ -247,7 +247,7 @@ public class MaidenOverlay extends RoomOverlay {
                             if (config.fontStyle()) {
                                 renderTextLocation(graphics, text, col, canvasPoint);
                             } else {
-                                renderSteroidsTextLocation(graphics, text, 14, 1, col, canvasPoint);
+                                renderSteroidsTextLocation(graphics, text, 14, Font.BOLD, col, canvasPoint);
                             }
                         }
                     }
@@ -346,14 +346,14 @@ public class MaidenOverlay extends RoomOverlay {
                             renderTextLocation(graphics, distanceLine, distanceColor, drawPoint);
                         }
                     } else {
-                        renderSteroidsTextLocation(graphics, text, 11, 1, color, drawPoint);
+                        renderResizeTextLocation(graphics, text, 11, Font.BOLD, color, drawPoint);
                         if (!distanceLine.equals("")) {
                             if(text.contains(":")) {
                                 drawPoint = new Point(drawPoint.getX() + 15, drawPoint.getY() - 10);
                             } else {
                                 drawPoint = new Point(drawPoint.getX() + 5, drawPoint.getY() - 10);
                             }
-                            renderSteroidsTextLocation(graphics, distanceLine, 11, 1, distanceColor, drawPoint);
+                            renderResizeTextLocation(graphics, distanceLine, 11, Font.BOLD, distanceColor, drawPoint);
                         }
                     }
                 }

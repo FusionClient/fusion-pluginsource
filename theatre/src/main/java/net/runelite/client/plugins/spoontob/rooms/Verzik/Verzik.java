@@ -1,8 +1,6 @@
 package net.runelite.client.plugins.spoontob.rooms.Verzik;
 
 import com.google.common.collect.ImmutableSet;
-import com.openosrs.client.util.PoisonStyle;
-import com.openosrs.client.util.PoisonWeaponMap;
 import lombok.Getter;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
@@ -15,6 +13,8 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.spoontob.Room;
 import net.runelite.client.plugins.spoontob.SpoonTobConfig;
 import net.runelite.client.plugins.spoontob.SpoonTobPlugin;
+import net.runelite.client.plugins.spoontob.util.PoisonStyle;
+import net.runelite.client.plugins.spoontob.util.PoisonWeaponMap;
 import net.runelite.client.plugins.spoontob.util.TheatreRegions;
 import net.runelite.client.util.ImageUtil;
 import org.apache.commons.lang3.ObjectUtils;
@@ -31,6 +31,8 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import static net.runelite.api.NpcID.*;
 
 public class Verzik extends Room {
     @Inject
@@ -83,28 +85,33 @@ public class Verzik extends Room {
     private static final int HM_ACID = 41747;
 
     protected static final Set<Integer> BEFORE_START_IDS = ImmutableSet.of(
-            NpcID.VERZIK_VITUR_8369, NpcID.VERZIK_VITUR_10830, NpcID.VERZIK_VITUR_10847
+            VERZIK_VITUR_8369, VERZIK_VITUR_10830, VERZIK_VITUR_10847
     );
     protected static final Set<Integer> P1_IDS = ImmutableSet.of(
-            NpcID.VERZIK_VITUR_8370, NpcID.VERZIK_VITUR_10831, NpcID.VERZIK_VITUR_10848
+            VERZIK_VITUR_8370, VERZIK_VITUR_10831, VERZIK_VITUR_10848
     );
     protected static final Set<Integer> P12_TRANSITION_IDS = ImmutableSet.of(
-            NpcID.VERZIK_VITUR_8371, NpcID.VERZIK_VITUR_10832, NpcID.VERZIK_VITUR_10849
+            VERZIK_VITUR_8371, VERZIK_VITUR_10832, VERZIK_VITUR_10849
     );
     protected static final Set<Integer> P2_IDS = ImmutableSet.of(
-            NpcID.VERZIK_VITUR_8372, NpcID.VERZIK_VITUR_10833, NpcID.VERZIK_VITUR_10850
+            VERZIK_VITUR_8372, VERZIK_VITUR_10833, VERZIK_VITUR_10850
     );
     protected static final Set<Integer> P23_TRANSITION_IDS = ImmutableSet.of(
-            NpcID.VERZIK_VITUR_8373, NpcID.VERZIK_VITUR_10834, NpcID.VERZIK_VITUR_10851
+            VERZIK_VITUR_8373, VERZIK_VITUR_10834, VERZIK_VITUR_10851
     );
     protected static final Set<Integer> P3_IDS = ImmutableSet.of(
-            NpcID.VERZIK_VITUR_8374, NpcID.VERZIK_VITUR_10835, NpcID.VERZIK_VITUR_10852
+            VERZIK_VITUR_8374, VERZIK_VITUR_10835, VERZIK_VITUR_10852
     );
     protected static final Set<Integer> DEAD_IDS = ImmutableSet.of(
-            NpcID.VERZIK_VITUR_8375, NpcID.VERZIK_VITUR_10836, NpcID.VERZIK_VITUR_10853
+            VERZIK_VITUR_8375, VERZIK_VITUR_10836, VERZIK_VITUR_10853
     );
     protected static final Set<Integer> NADO_IDS = ImmutableSet.of(
             REGULAR_TORNADO, SM_TORNADO, HM_TORNADO
+    );
+    protected static final Set<Integer> VERZIK_ACTIVE_IDS = ImmutableSet.of(
+            VERZIK_VITUR_8370, VERZIK_VITUR_8371, VERZIK_VITUR_8372, VERZIK_VITUR_8373, VERZIK_VITUR_8374,
+            VERZIK_VITUR_10831, VERZIK_VITUR_10832, VERZIK_VITUR_10833, VERZIK_VITUR_10834, VERZIK_VITUR_10835,
+            VERZIK_VITUR_10848, VERZIK_VITUR_10849, VERZIK_VITUR_10850, VERZIK_VITUR_10851, VERZIK_VITUR_10852
     );
 
     @Getter
@@ -153,8 +160,6 @@ public class Verzik extends Room {
     public ArrayList<NPC> redCrabs = new ArrayList<>();
     public ArrayList<Integer> lastRatioList = new ArrayList<>();
     public ArrayList<Integer> lastHealthScaleList = new ArrayList<>();
-
-    public ArrayList<Color> raveNadoColors = new ArrayList<>();
 
     public ArrayList<GameObject> acidSpots = new ArrayList<>();
     public ArrayList<Integer> acidSpotsTimer = new ArrayList<>();
@@ -247,60 +252,60 @@ public class Verzik extends Room {
     public void onNpcSpawned(NpcSpawned npcSpawned) {
         NPC npc = npcSpawned.getNpc();
         switch(npc.getId()) {
-            case NpcID.VERZIK_VITUR_8369:
-            case NpcID.VERZIK_VITUR_8371:
-            case NpcID.VERZIK_VITUR_8373:
-            case NpcID.VERZIK_VITUR_8375:
-            case NpcID.VERZIK_VITUR_10830: //Story mode
-            case NpcID.VERZIK_VITUR_10832:
-            case NpcID.VERZIK_VITUR_10834:
-            case NpcID.VERZIK_VITUR_10836:
-            case NpcID.VERZIK_VITUR_10847: //Hard mode
-            case NpcID.VERZIK_VITUR_10849:
-            case NpcID.VERZIK_VITUR_10851:
-            case NpcID.VERZIK_VITUR_10853:
+            case VERZIK_VITUR_8369:
+            case VERZIK_VITUR_8371:
+            case VERZIK_VITUR_8373:
+            case VERZIK_VITUR_8375:
+            case VERZIK_VITUR_10830: //Story mode
+            case VERZIK_VITUR_10832:
+            case VERZIK_VITUR_10834:
+            case VERZIK_VITUR_10836:
+            case VERZIK_VITUR_10847: //Hard mode
+            case VERZIK_VITUR_10849:
+            case VERZIK_VITUR_10851:
+            case VERZIK_VITUR_10853:
                 verzikSpawn(npc);
                 break;
-            case NpcID.VERZIK_VITUR_8370:
-            case NpcID.VERZIK_VITUR_10831: //Story Mode
-            case NpcID.VERZIK_VITUR_10848: //Hard Mode
+            case VERZIK_VITUR_8370:
+            case VERZIK_VITUR_10831: //Story Mode
+            case VERZIK_VITUR_10848: //Hard Mode
                 verzikPhase = Phase.PHASE1;
                 verzikSpawn(npc);
                 break;
-            case NpcID.VERZIK_VITUR_8372:
-            case NpcID.VERZIK_VITUR_10833: //Story Mode
-            case NpcID.VERZIK_VITUR_10850: //Hard Mode
+            case VERZIK_VITUR_8372:
+            case VERZIK_VITUR_10833: //Story Mode
+            case VERZIK_VITUR_10850: //Hard Mode
                 verzikPhase = Phase.PHASE2;
                 verzikSpawn(npc);
                 lightningAttacks = 4;
                 break;
-            case NpcID.VERZIK_VITUR_8374:
-            case NpcID.VERZIK_VITUR_10835: //Story Mode
-            case NpcID.VERZIK_VITUR_10852: //Hard Mode
+            case VERZIK_VITUR_8374:
+            case VERZIK_VITUR_10835: //Story Mode
+            case VERZIK_VITUR_10852: //Hard Mode
                 verzikPhase = Phase.PHASE3;
                 verzikSpawn(npc);
                 break;
-            case NpcID.WEB:
-            case NpcID.WEB_10837: //Story Mode
-            case NpcID.WEB_10854: //Hard Mode
+            case WEB:
+            case WEB_10837: //Story Mode
+            case WEB_10854: //Hard Mode
                 if (verzikNPC != null && verzikNPC.getInteracting() == null) {
                     verzikSpecial = SpecialAttack.WEBS;
                 }
                 break;
-            case NpcID.NYLOCAS_ISCHYROS_8381:
-            case NpcID.NYLOCAS_TOXOBOLOS_8382:
-            case NpcID.NYLOCAS_HAGIOS_8383:
-            case NpcID.NYLOCAS_ISCHYROS_10841: //Story mode
-            case NpcID.NYLOCAS_TOXOBOLOS_10842:
-            case NpcID.NYLOCAS_HAGIOS_10843:
-            case NpcID.NYLOCAS_ISCHYROS_10858: //Hard mode
-            case NpcID.NYLOCAS_TOXOBOLOS_10859:
-            case NpcID.NYLOCAS_HAGIOS_10860:
+            case NYLOCAS_ISCHYROS_8381:
+            case NYLOCAS_TOXOBOLOS_8382:
+            case NYLOCAS_HAGIOS_8383:
+            case NYLOCAS_ISCHYROS_10841: //Story mode
+            case NYLOCAS_TOXOBOLOS_10842:
+            case NYLOCAS_HAGIOS_10843:
+            case NYLOCAS_ISCHYROS_10858: //Hard mode
+            case NYLOCAS_TOXOBOLOS_10859:
+            case NYLOCAS_HAGIOS_10860:
                 verzikAggros.add(npc);
                 break;
-            case NpcID.NYLOCAS_MATOMENOS_8385:
-            case NpcID.NYLOCAS_MATOMENOS_10845: //Story Mode
-            case NpcID.NYLOCAS_MATOMENOS_10862: //Hard Mode
+            case NYLOCAS_MATOMENOS_8385:
+            case NYLOCAS_MATOMENOS_10845: //Story Mode
+            case NYLOCAS_MATOMENOS_10862: //Hard Mode
                 verzikReds.putIfAbsent(npc, new MutablePair(npc.getHealthRatio(), npc.getHealthScale()));
                 break;
             case REGULAR_TORNADO:
@@ -346,42 +351,42 @@ public class Verzik extends Room {
     public void onNpcDespawned(NpcDespawned npcDespawned) {
         NPC npc = npcDespawned.getNpc();
         switch(npc.getId()) {
-            case NpcID.VERZIK_VITUR_8369:
-            case NpcID.VERZIK_VITUR_8370:
-            case NpcID.VERZIK_VITUR_8371:
-            case NpcID.VERZIK_VITUR_8372:
-            case NpcID.VERZIK_VITUR_8373:
-            case NpcID.VERZIK_VITUR_8374:
-            case NpcID.VERZIK_VITUR_8375:
-            case NpcID.VERZIK_VITUR_10830: //Story mode
-            case NpcID.VERZIK_VITUR_10831:
-            case NpcID.VERZIK_VITUR_10832:
-            case NpcID.VERZIK_VITUR_10833:
-            case NpcID.VERZIK_VITUR_10834:
-            case NpcID.VERZIK_VITUR_10835:
-            case NpcID.VERZIK_VITUR_10836:
-            case NpcID.VERZIK_VITUR_10847: //Hard mode
-            case NpcID.VERZIK_VITUR_10848:
-            case NpcID.VERZIK_VITUR_10849:
-            case NpcID.VERZIK_VITUR_10850:
-            case NpcID.VERZIK_VITUR_10851:
-            case NpcID.VERZIK_VITUR_10852:
-            case NpcID.VERZIK_VITUR_10853:
+            case VERZIK_VITUR_8369:
+            case VERZIK_VITUR_8370:
+            case VERZIK_VITUR_8371:
+            case VERZIK_VITUR_8372:
+            case VERZIK_VITUR_8373:
+            case VERZIK_VITUR_8374:
+            case VERZIK_VITUR_8375:
+            case VERZIK_VITUR_10830: //Story mode
+            case VERZIK_VITUR_10831:
+            case VERZIK_VITUR_10832:
+            case VERZIK_VITUR_10833:
+            case VERZIK_VITUR_10834:
+            case VERZIK_VITUR_10835:
+            case VERZIK_VITUR_10836:
+            case VERZIK_VITUR_10847: //Hard mode
+            case VERZIK_VITUR_10848:
+            case VERZIK_VITUR_10849:
+            case VERZIK_VITUR_10850:
+            case VERZIK_VITUR_10851:
+            case VERZIK_VITUR_10852:
+            case VERZIK_VITUR_10853:
                 verzikCleanup();
-            case NpcID.NYLOCAS_ISCHYROS_8381:
-            case NpcID.NYLOCAS_TOXOBOLOS_8382:
-            case NpcID.NYLOCAS_HAGIOS_8383:
-            case NpcID.NYLOCAS_ISCHYROS_10841: //Story mode
-            case NpcID.NYLOCAS_TOXOBOLOS_10842:
-            case NpcID.NYLOCAS_HAGIOS_10843:
-            case NpcID.NYLOCAS_ISCHYROS_10858: //Hard mode
-            case NpcID.NYLOCAS_TOXOBOLOS_10859:
-            case NpcID.NYLOCAS_HAGIOS_10860:
+            case NYLOCAS_ISCHYROS_8381:
+            case NYLOCAS_TOXOBOLOS_8382:
+            case NYLOCAS_HAGIOS_8383:
+            case NYLOCAS_ISCHYROS_10841: //Story mode
+            case NYLOCAS_TOXOBOLOS_10842:
+            case NYLOCAS_HAGIOS_10843:
+            case NYLOCAS_ISCHYROS_10858: //Hard mode
+            case NYLOCAS_TOXOBOLOS_10859:
+            case NYLOCAS_HAGIOS_10860:
                 verzikAggros.remove(npc);
                 break;
-            case NpcID.NYLOCAS_MATOMENOS_8385:
-            case NpcID.NYLOCAS_MATOMENOS_10845: //Story Mode
-            case NpcID.NYLOCAS_MATOMENOS_10862: //Hard Mode
+            case NYLOCAS_MATOMENOS_8385:
+            case NYLOCAS_MATOMENOS_10845: //Story Mode
+            case NYLOCAS_MATOMENOS_10862: //Hard Mode
                 verzikReds.remove(npc);
                 break;
             case REGULAR_TORNADO:
@@ -411,24 +416,24 @@ public class Verzik extends Room {
         if (id == VERZIK_RANGE_BALL) {
             WorldPoint wp = WorldPoint.fromLocal(client, event.getPosition());
             verzikRangeProjectiles.put(event.getProjectile(), wp);
-            if(lightningAttacksDelay == 0) {
+            if (lightningAttacksDelay == 0) {
                 lightningAttacks--;
                 lightningAttacksDelay = 4;
             }
         } else if (id == VERZIK_PURPLE_SPAWN) {
             purpleCrabProjectile.put(event.getPosition(), ticks);
             purpleAttacksLeft = 21;
-        } else if (id == VERZIK_LIGHTNING_BALL) {
+        } else if (id == VERZIK_LIGHTNING_BALL && lightningAttacks < 2) {
             lightningAttacks = 4;
             if (ticks > 0) {
                 verzikLightningProjectiles.putIfAbsent(p, ticks);
             }
         } else if (id == VERZIK_GREEN_BALL){
-            if(!greenBallOut){
+            if (!greenBallOut){
                 greenBallOut = true;
             }
 
-            if(p.getRemainingCycles() == 0){
+            if (p.getRemainingCycles() == 0){
                 greenBallOut = false;
                 greenBallBounces++;
                 greenBallDelay = 3;
@@ -440,11 +445,11 @@ public class Verzik extends Room {
     public void onGraphicsObjectCreated(GraphicsObjectCreated event){
         if (event.getGraphicsObject().getId() == VERZIK_YELLOW_OBJECT && !yellowsOut) {
             WorldPoint wp = WorldPoint.fromLocal(client, event.getGraphicsObject().getLocation());
-            if(!yellows.contains(wp)) {
+            if (!yellows.contains(wp)) {
                 yellows.add(wp);
             }
 
-            if(!yellowsList.contains(wp)) {
+            if (!yellowsList.contains(wp)) {
                 yellowsList.add(wp);
             }
         }
@@ -476,10 +481,10 @@ public class Verzik extends Room {
 
     @Subscribe
     public void onGameObjectDespawned(GameObjectDespawned event){
-        if(config.showVerzikAcid() && event.getGameObject().getId() == HM_ACID) {
+        if (config.showVerzikAcid() && event.getGameObject().getId() == HM_ACID) {
             int index = acidSpots.indexOf(event.getGameObject());
             acidSpots.remove(event.getGameObject());
-            if(index != -1) {
+            if (index != -1) {
                 acidSpotsTimer.remove(index);
             }
         }
@@ -489,7 +494,7 @@ public class Verzik extends Room {
     public void onConfigChanged(ConfigChanged event) {
         if (event.getGroup().equals("spoontob")) {
             if (event.getKey().equals("hideOtherNados")) {
-                if(!config.hideOtherNados()){
+                if (!config.hideOtherNados()){
                     plugin.clearHiddenNpcs();
                 }
             }
@@ -504,7 +509,7 @@ public class Verzik extends Room {
                 NPC npc = (NPC)actor;
                 if (npc.getName() != null && npc.getName().equals("Nylocas Matomenos") && npc.getAnimation() == 8097){
                     int index = redCrabs.indexOf(npc);
-                    if(index != -1) {
+                    if (index != -1) {
                         lastRatioList.remove(index);
                         lastHealthScaleList.remove(index);
                     }
@@ -516,7 +521,7 @@ public class Verzik extends Room {
 
     @Subscribe
     public void onMenuEntryAdded(MenuEntryAdded event) {
-        if(verzikNPC != null) {
+        if (verzikNPC != null) {
             String target = event.getTarget();
             Player player = client.getLocalPlayer();
             PlayerComposition playerComp = player != null ? player.getPlayerComposition() : null;
@@ -548,8 +553,8 @@ public class Verzik extends Room {
         Player player = client.getLocalPlayer();
         PlayerComposition playerComp = player != null ? player.getPlayerComposition() : null;
 
-        if (event.getMenuAction() == MenuAction.ITEM_SECOND_OPTION) {
-            PoisonStyle newStyle = PoisonWeaponMap.PoisonType.get(event.getId());
+        if (event.getMenuOption().equalsIgnoreCase("wield")) {
+            PoisonStyle newStyle = PoisonWeaponMap.PoisonType.get(event.getItemId());
             if (newStyle != null) {
                 skipTickCheck = true;
                 poisonStyle = newStyle;
@@ -570,19 +575,19 @@ public class Verzik extends Room {
 
     @Subscribe
     public void onActorDeath(ActorDeath event) {
-        if(verzikNPC != null && event.getActor() instanceof Player && event.getActor().getName() != null){
+        if (verzikNPC != null && event.getActor() instanceof Player && event.getActor().getName() != null){
             partyMembersNames.remove(event.getActor().getName());
         }
     }
 
     @Subscribe
     public void onGraphicChanged(GraphicChanged event) {
-        if(event.getActor() != null  && event.getActor().getName() != null && event.getActor() instanceof Player && verzikPhase == Phase.PHASE3){
+        if (event.getActor() != null  && event.getActor().getName() != null && event.getActor() instanceof Player && verzikPhase == Phase.PHASE3){
             Actor actor = event.getActor();
-            if(actor.getGraphic() == 1602 && actor.getName().equals(client.getLocalPlayer().getName())){
+            if (actor.getGraphic() == 1602 && actor.getName().equals(client.getLocalPlayer().getName())){
                 personalNado = null;
                 personalNadoRespawn = 18;
-                if(nadoList.size() == 1){
+                if (nadoList.size() == 1){
                     nadoList.clear();
                 }
             }
@@ -591,8 +596,8 @@ public class Verzik extends Room {
 
     @Subscribe
     public void onAreaSoundEffectPlayed(AreaSoundEffectPlayed event){
-        if(event.getSource() != null && event.getSource().getName() != null && verzikNPC != null && config.muteVerzikSounds()) {
-            if(event.getSoundId() == 3991 || event.getSoundId() == 3987){
+        if (event.getSource() != null && event.getSource().getName() != null && verzikNPC != null && config.muteVerzikSounds()) {
+            if (event.getSoundId() == 3991 || event.getSoundId() == 3987){
                 event.consume();
             }
         }
@@ -613,22 +618,22 @@ public class Verzik extends Room {
                 helmId = equippedHelm;
             }
 
-            if(lightningAttacksDelay > 0){
+            if (lightningAttacksDelay > 0){
                 lightningAttacksDelay--;
             }
 
-            if(personalNadoRespawn > 0){
+            if (personalNadoRespawn > 0){
                 personalNadoRespawn--;
             }
 
-            if(greenBallDelay > 0){
+            if (greenBallDelay > 0){
                 greenBallDelay--;
-                if(greenBallDelay == 0 && !greenBallOut){
+                if (greenBallDelay == 0 && !greenBallOut){
                     greenBallBounces = 0;
                 }
             }
 
-            if(acidSpots.size() > 0 && acidSpotsTimer.size() > 0){
+            if (acidSpots.size() > 0 && acidSpotsTimer.size() > 0){
                 for(int i=0; i<acidSpotsTimer.size(); i++){
                     acidSpotsTimer.set(i, acidSpotsTimer.get(i) - 1);
                 }
@@ -645,51 +650,51 @@ public class Verzik extends Room {
             }
 
             if (verzikPhase == Phase.PHASE3) {
-                if(yellowsList.size() > 0){
-                    if(!yellowsOut) {
-                        if (verzikNPC.getId() == NpcID.VERZIK_VITUR_10852) {
+                if (yellowsList.size() > 0){
+                    if (!yellowsOut) {
+                        if (verzikNPC.getId() == VERZIK_VITUR_10852) {
                             yellowGroups = findYellows(yellows);
                         }
                         yellowsOut = true;
                     }else {
                         yellowTimer--;
                         if (yellowTimer <= 0) {
-                            if (verzikNPC.getId() == NpcID.VERZIK_VITUR_10852) {
+                            if (verzikNPC.getId() == VERZIK_VITUR_10852) {
                                 if (hmYellowSpotNum < 3) {
                                     yellowTimer = 3;
                                     hmYellowSpotNum++;
 
                                     for(Player p : client.getPlayers()){
-                                        if(p.getName() != null && partyMembersNames.contains(p.getName())){
+                                        if (p.getName() != null && partyMembersNames.contains(p.getName())){
                                             WorldPoint wp = WorldPoint.fromLocal(client, p.getLocalLocation());
                                             int index = 0;
 
                                             for(ArrayList<WorldPoint> yg : yellowGroups){
-                                                if(yg.contains(wp)){
+                                                if (yg.contains(wp)){
                                                     yellowGroups.get(index).remove(wp);
                                                     break;
                                                 }else {
                                                     boolean exitLoop = false;
                                                     for(int i = yg.size() - 1; i>=0; i--){
-                                                        if(yg.get(i).distanceTo(wp) <= 1) {
+                                                        if (yg.get(i).distanceTo(wp) <= 1) {
                                                             yellowGroups.get(index).remove(i);
                                                             exitLoop = true;
                                                             break;
                                                         }
                                                     }
 
-                                                    if(exitLoop){
+                                                    if (exitLoop){
                                                         break;
                                                     }
                                                 }
                                                 index++;
                                             }
 
-                                            if(yellowsList.contains(wp)){
+                                            if (yellowsList.contains(wp)){
                                                 yellowsList.remove(wp);
                                             }else {
                                                 for(int i = yellowsList.size() - 1; i>=0; i--){
-                                                    if(yellowsList.get(i).distanceTo(wp) <= 1){
+                                                    if (yellowsList.get(i).distanceTo(wp) <= 1){
                                                         yellowsList.remove(i);
                                                         break;
                                                     }
@@ -725,7 +730,7 @@ public class Verzik extends Room {
                         if (nadoList.size() == 0) {
                             for (NPC npc : client.getNpcs()) {
                                 if (NADO_IDS.contains(npc.getId()))
-                                    nadoList.add(new TornadoTracker(npc));
+                                nadoList.add(new TornadoTracker(npc));
                                 personalNado = null;
                                 recalc = true;
 
@@ -749,26 +754,26 @@ public class Verzik extends Room {
 
             if (verzikTickPaused) {
                 switch (verzikNPC.getId()) {
-                    case NpcID.VERZIK_VITUR_8370:
-                    case NpcID.VERZIK_VITUR_10831:
-                    case NpcID.VERZIK_VITUR_10848:
+                    case VERZIK_VITUR_8370:
+                    case VERZIK_VITUR_10831:
+                    case VERZIK_VITUR_10848:
                         verzikPhase = Phase.PHASE1;
                         verzikAttackCount = 0;
                         verzikTicksUntilAttack = 18;
                         verzikTickPaused = false;
                         break;
-                    case NpcID.VERZIK_VITUR_8372:
-                    case NpcID.VERZIK_VITUR_10832:
-                    case NpcID.VERZIK_VITUR_10850:
+                    case VERZIK_VITUR_8372:
+                    case VERZIK_VITUR_10832:
+                    case VERZIK_VITUR_10850:
                         verzikPhase = Phase.PHASE2;
                         verzikAttackCount = 0;
                         verzikTicksUntilAttack = 3;
                         verzikTickPaused = false;
                         purpleAttacksLeft = 21;
                         break;
-                    case NpcID.VERZIK_VITUR_8374:
-                    case NpcID.VERZIK_VITUR_10835:
-                    case NpcID.VERZIK_VITUR_10852:
+                    case VERZIK_VITUR_8374:
+                    case VERZIK_VITUR_10835:
+                    case VERZIK_VITUR_10852:
                         verzikPhase = Phase.PHASE3;
                         verzikAttackCount = 0;
                         verzikTicksUntilAttack = 6;
@@ -879,11 +884,6 @@ public class Verzik extends Room {
                 purpleCrabProjectile.replaceAll(updateTicks);
             }
 
-            raveNadoColors.clear();
-            for(int i=0; i<nadosOut; i++){
-                raveNadoColors.add(Color.getHSBColor(new Random().nextFloat(), 0.9F, 1.0F));
-            }
-
             if (verzikPhase == Phase.PHASE2) {
                 for (Iterator<Projectile> it = verzikLightningProjectiles.keySet().iterator(); it.hasNext(); ) {
                     Projectile key = it.next();
@@ -972,7 +972,7 @@ public class Verzik extends Room {
         pillarLocations = new ArrayList<>();
     }
 
-    static enum SpecialAttack {
+    enum SpecialAttack {
         WEB_COOLDOWN,
         WEBS,
         YELLOWS,
@@ -980,7 +980,7 @@ public class Verzik extends Room {
         NONE;
     }
 
-    public static enum Phase {
+    public enum Phase {
         PHASE1,
         PHASE2,
         PHASE3;
@@ -1003,19 +1003,19 @@ public class Verzik extends Room {
     }
 
     public int isSetSpawn(WorldPoint p) {
-        if(p.getRegionX() == 7 && p.getRegionY() == 11) {
+        if (p.getRegionX() == 7 && p.getRegionY() == 11) {
             return 1;
         }
-        else if(p.getRegionX() == 16 && p.getRegionY() == 17) {
+        else if (p.getRegionX() == 16 && p.getRegionY() == 17) {
             return 2;
         }
-        else if(p.getRegionX() == 25 && p.getRegionY() == 11) {
+        else if (p.getRegionX() == 25 && p.getRegionY() == 11) {
             return 3;
         }
-        else if(p.getRegionX() == 7 && p.getRegionY() == 23) {
+        else if (p.getRegionX() == 7 && p.getRegionY() == 23) {
             return 4;
         }
-        else if(p.getRegionX() == 25 && p.getRegionY() == 23) {
+        else if (p.getRegionX() == 25 && p.getRegionY() == 23) {
             return 5;
         }
         else {
@@ -1025,7 +1025,7 @@ public class Verzik extends Room {
 
     public WorldPoint getNextValidPoint(ArrayList<WorldPoint> points) {
         for(WorldPoint p : points) {
-            if(isSetSpawn(p) != -1) {
+            if (isSetSpawn(p) != -1) {
                 return p;
             }
         }
@@ -1068,9 +1068,9 @@ public class Verzik extends Room {
             mirrorMode = true;
         }*/
 
-        if(config.hideOtherNados()) {
+        if (config.hideOtherNados()) {
             for (NPC npc : client.getNpcs()) {
-                if (npc != null && (npc.getId() == 8386 || npc.getId() == 10846 || npc.getId() == 10863)) {
+                if (npc != null && NADO_IDS.contains(npc.getId())) {
                     if (personalNado != null && personalNado.getIndex() != npc.getIndex()) {
                         if (!plugin.hiddenIndices.contains(npc.getIndex())) {
                             plugin.setHiddenNpc(npc, true);
