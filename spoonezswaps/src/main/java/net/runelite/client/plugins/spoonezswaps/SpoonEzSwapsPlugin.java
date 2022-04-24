@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 import com.openosrs.client.util.WeaponMap;
 import com.openosrs.client.util.WeaponStyle;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
@@ -53,7 +54,7 @@ import static com.google.common.base.Predicates.equalTo;
 		name = "[F] Ez Swaps",
 		enabledByDefault = false,
 		description = "A shit ton of menu entry swapper stuff.",
-		tags = {"pickpocket", "equipped items", "inventory", "items", "equip", "construction", "ez", "skilling", "pvm", "custom", "swapper"}
+		tags = {"pickpocket", "equipped items", "inventory", "items", "equip", "construction", "spoon", "ez", "skilling", "pvm", "custom", "swapper", "fusion"}
 )
 public class SpoonEzSwapsPlugin extends Plugin {
 	@Inject
@@ -180,6 +181,8 @@ public class SpoonEzSwapsPlugin extends Plugin {
 
 	public int vetionHarmAttackedTick = -1;
 
+	private boolean atRunecraftingAltar;
+
 	@Provides
 	SpoonEzSwapsConfig provideConfig(ConfigManager configManager)
 	{
@@ -272,28 +275,47 @@ public class SpoonEzSwapsPlugin extends Plugin {
 		if (event.getGameState() == GameState.LOGGED_IN) {
 			loadSwaps();
 		}
+
+		if (config.swapEmptyPouch() && event.getGameState() == GameState.LOADING)
+		{
+			atRunecraftingAltar = AltarRegion.IDS.contains(client.getMapRegions()[0]);
+		}
+
 	}
 
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event) {
-		if (config.getEasyConstruction()) {
-			if ((client.getVarbitValue(2176) != 1) && event.getType() != MenuAction.GAME_OBJECT_FIFTH_OPTION.getId()) {
-				return;
-			}
-			MenuEntry[] menuEntries = client.getMenuEntries();
+		if (config.getEasyConstruction() && (client.getVarbitValue(2176) == 1 ||
+				event.getType() == MenuAction.GAME_OBJECT_FIFTH_OPTION.getId())) {
+			final MenuEntry[] menuEntries = client.getMenuEntries();
 			swapConstructionMenu(menuEntries);
+			return;
 		}
+
+
+		if (config.swapEmptyPouch() && atRunecraftingAltar && event.getType() == MenuAction.ITEM_FIRST_OPTION.getId()
+				&& event.getTarget().endsWith("pouch")) {
+			final MenuEntry[] menuEntries = client.getMenuEntries();
+
+			final MenuEntry firstEntry = menuEntries[menuEntries.length - 1];
+
+			menuEntries[menuEntries.length - 1] = menuEntries[menuEntries.length - 2];
+			menuEntries[menuEntries.length - 2] = firstEntry;
+
+			client.setMenuEntries(menuEntries);
+		}
+
 	}
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event) {
-		if (event.getMenuAction() == MenuAction.ITEM_SECOND_OPTION) {
-			WeaponStyle newStyle = WeaponMap.StyleMap.get(event.getId());
+		if (event.getMenuOption().equalsIgnoreCase("wield")) {
+			WeaponStyle newStyle = WeaponMap.StyleMap.get(event.getItemId());
 			if (newStyle != null) {
 				skipTickCheck = true;
 				weaponStyle = newStyle;
 			}
-		} else if (event.getMenuAction() == MenuAction.NPC_SECOND_OPTION && vetionHarmAttackedTick != -1 && client.getTickCount() != vetionHarmAttackedTick + 1 && config.vetionBoosting()
+		} else if (vetionHarmAttackedTick != -1 && client.getTickCount() != vetionHarmAttackedTick + 1 && config.vetionBoosting()
 				&& event.getMenuTarget().contains("Vet'ion") && event.getMenuOption().contains("Attack")) {
 			event.consume();
 		}
@@ -308,28 +330,34 @@ public class SpoonEzSwapsPlugin extends Plugin {
 
 	private void swapMenuEntry(int index, MenuEntry menuEntry) {
 		final int eventId = menuEntry.getIdentifier();
-		final MenuAction menuAction = MenuAction.of(menuEntry.getType().getId());
+		final MenuAction menuAction = menuEntry.getType();
 		final String option = Text.removeTags(menuEntry.getOption()).toLowerCase();
 		final String target = Text.removeTags(menuEntry.getTarget()).toLowerCase();
 		final NPC hintArrowNpc = client.getHintArrowNpc();
 
-		if (hintArrowNpc != null && hintArrowNpc.getIndex() == eventId && NPC_MENU_TYPES.contains(menuAction)) {
+		if (hintArrowNpc != null
+				&& hintArrowNpc.getIndex() == eventId
+				&& NPC_MENU_TYPES.contains(menuAction))
+		{
 			return;
 		}
 
-		if (shiftModifier() && (menuAction == MenuAction.ITEM_FIRST_OPTION
-				|| menuAction == MenuAction.ITEM_SECOND_OPTION
-				|| menuAction == MenuAction.ITEM_THIRD_OPTION
-				|| menuAction == MenuAction.ITEM_FOURTH_OPTION
-				|| menuAction == MenuAction.ITEM_FIFTH_OPTION
-				|| menuAction == MenuAction.ITEM_USE)) {
+		final boolean itemOp = menuEntry.isItemOp();
+		// Custom shift-click item swap
+		if (shiftModifier() && itemOp)
+		{
+			// don't perform swaps on items when shift is held; instead prefer the client menu swap, which
+			// we may have overwrote
 			return;
 		}
 
 		Collection<Swap> swaps = this.swaps.get(option);
-		for (Swap swap : swaps) {
-			if (swap.getTargetPredicate().test(target) && swap.getEnabled().get()) {
-				if (shitSwap(swap.getSwappedOption(), target, index, swap.isStrict())) {
+		for (Swap swap : swaps)
+		{
+			if (swap.getTargetPredicate().test(target) && swap.getEnabled().get())
+			{
+				if (shitSwap(swap.getSwappedOption(), target, index, swap.isStrict()))
+				{
 					break;
 				}
 			}
@@ -739,51 +767,49 @@ public class SpoonEzSwapsPlugin extends Plugin {
 					return true;
 				}
 			}
-		} else if (config.hideAttackBandos() || config.hideAttackBandosMinions() || config.hideAttackSara() || config.hideAttackKree()
-				|| config.hideAttackSaraMinions() || config.hideAttackZammy() || config.hideAttackZammyMinions() || config.hideAttackArmaMinions()) {
-			if (isInGodWars()) {
-				boolean bossAlive = false;
-				boolean minionsAlive = false;
-				for (NPC npc : client.getNpcs()) {
-					if (npc != null && npc.getName() != null && npc.getHealthRatio() != 0) {
-						String npcName = Text.standardize(npc.getName());
-						if ((npcName.contains(BANDOS_BOSS) || npcName.contains(SARA_BOSS) || npcName.contains(ZAMMY_BOSS) || npcName.contains(ARMA_BOSS))
-								&& npc.getComposition().getSize() > 1) {
-							bossAlive = true;
-						}
-						if (BANDOS_MINIONS.contains(npcName) || SARA_MINIONS.contains(npcName) || ZAMMY_MINIONS.contains(npcName) || ARMA_MINIONS.contains(npcName)) {
-							minionsAlive = true;
-						}
+		} else if (isInGodWars() && (config.hideAttackBandos() || config.hideAttackBandosMinions() || config.hideAttackSara() || config.hideAttackKree()
+				|| config.hideAttackSaraMinions() || config.hideAttackZammy() || config.hideAttackZammyMinions() || config.hideAttackArmaMinions())) {
+			boolean bossAlive = false;
+			boolean minionsAlive = false;
+			for (NPC npc : client.getNpcs()) {
+				if (npc != null && npc.getName() != null && npc.getHealthRatio() != 0) {
+					String npcName = Text.standardize(npc.getName());
+					if ((npcName.contains(BANDOS_BOSS) || npcName.contains(SARA_BOSS) || npcName.contains(ZAMMY_BOSS) || npcName.contains(ARMA_BOSS))
+							&& npc.getComposition().getSize() > 1) {
+						bossAlive = true;
+					}
+					if (BANDOS_MINIONS.contains(npcName) || SARA_MINIONS.contains(npcName) || ZAMMY_MINIONS.contains(npcName) || ARMA_MINIONS.contains(npcName)) {
+						minionsAlive = true;
 					}
 				}
-
-				target = target.replace("*", "");
-
-				if (config.hideAttackBandos() && minionsAlive && target.contains(BANDOS_BOSS)) {
-					return false;
-				} else if (config.hideAttackBandosMinions() && bossAlive && BANDOS_MINIONS.contains(target)) {
-					return false;
-				} else if (config.hideAttackSara() && minionsAlive && target.contains(SARA_BOSS)) {
-					return false;
-				} else if (config.hideAttackSaraMinions() && bossAlive && SARA_MINIONS.contains(target)) {
-					return false;
-				} else if (config.hideAttackZammy() && minionsAlive && target.contains(ZAMMY_BOSS)) {
-					return false;
-				} else if (config.hideAttackZammyMinions() && bossAlive && ZAMMY_MINIONS.contains(target)) {
-					return false;
-				} else if (config.hideAttackKree() && minionsAlive && target.contains(ARMA_BOSS) && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId()) {
-					entry.setDeprioritized(true);
-					return true;
-				} else if (config.hideAttackArmaMinions() && bossAlive && ARMA_MINIONS.contains(target) && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId()) {
-					entry.setDeprioritized(true);
-					return true;
-				}
 			}
-		} else if ((config.swapDustDevils() && (target.contains("dust devil") || target.contains("choke devil"))) || (config.swapNechs() && (target.contains("nechrya") || target.contains("death spawn")))
+
+			target = target.replace("*", "");
+
+			if (config.hideAttackBandos() && minionsAlive && target.contains(BANDOS_BOSS)) {
+				return false;
+			} else if (config.hideAttackBandosMinions() && bossAlive && BANDOS_MINIONS.contains(target)) {
+				return false;
+			} else if (config.hideAttackSara() && minionsAlive && target.contains(SARA_BOSS)) {
+				return false;
+			} else if (config.hideAttackSaraMinions() && bossAlive && SARA_MINIONS.contains(target)) {
+				return false;
+			} else if (config.hideAttackZammy() && minionsAlive && target.contains(ZAMMY_BOSS)) {
+				return false;
+			} else if (config.hideAttackZammyMinions() && bossAlive && ZAMMY_MINIONS.contains(target)) {
+				return false;
+			} else if (config.hideAttackKree() && minionsAlive && target.contains(ARMA_BOSS) && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId()) {
+				entry.setDeprioritized(true);
+				return true;
+			} else if (config.hideAttackArmaMinions() && bossAlive && ARMA_MINIONS.contains(target) && entry.getType().getId() == MenuAction.NPC_SECOND_OPTION.getId()) {
+				entry.setDeprioritized(true);
+				return true;
+			}
+		} else if (((config.swapDustDevils() && (target.contains("dust devil") || target.contains("choke devil"))) || (config.swapNechs() && (target.contains("nechrya") || target.contains("death spawn"))))
 				&& option.equals("attack") && weaponStyle == WeaponStyle.MAGIC) {
 			entry.setDeprioritized(true);
 			return true;
-		} else if (config.swapSmokeDevil() && client.getLocalPlayer() != null && target.contains("smoke devil") && !target.contains("thermonuclear") && !target.contains("pet") && weaponStyle == WeaponStyle.MAGIC) {
+		} else if (config.swapSmokeDevil() && client.getLocalPlayer() != null && target.contains("smoke devil") && !target.contains("thermonuclear") && !target.contains("pet")) {
 			if (client.getLocalPlayer().getWorldLocation().getRegionID() == 9619) {
 				for (NPC smokes : client.getNpcs()) {
 					if (smokes.getName() != null && Text.standardize(smokes.getName()).contains("thermonuclear") && smokes.getHealthRatio() != 0) {
@@ -791,6 +817,8 @@ public class SpoonEzSwapsPlugin extends Plugin {
 						return true;
 					}
 				}
+				entry.setDeprioritized(weaponStyle == WeaponStyle.MAGIC);
+				return true;
 			} else if (client.getLocalPlayer().getWorldLocation().getRegionID() == 9363) {
 				entry.setDeprioritized(true);
 				return true;
@@ -933,7 +961,7 @@ public class SpoonEzSwapsPlugin extends Plugin {
 		}
 	}
 
-	private final ArrayList<Integer> GWD_MAP_REGIONS = new ArrayList<>(Arrays.asList(11603, 11347, 11346, 11601, 11602));
+	private final ArrayList<Integer> GWD_MAP_REGIONS = new ArrayList<>(Arrays.asList(11347, 11346, 11601, 11602, 11603));
 
 	public boolean isInGodWars() {
 		if (client.isInInstancedRegion() && client.getLocalPlayer() != null) {
@@ -1000,6 +1028,7 @@ public class SpoonEzSwapsPlugin extends Plugin {
 					}
 					if (lowerCaseActor.equals(name.toLowerCase())) {
 						sendSound = true;
+						break;
 					}
 				}
 			}
@@ -1009,11 +1038,7 @@ public class SpoonEzSwapsPlugin extends Plugin {
 				FilenameFilter textFilefilter = new FilenameFilter(){
 					public boolean accept(File dir, String name) {
 						String lowercaseName = name.toLowerCase();
-						if (lowercaseName.endsWith(".wav")) {
-							return true;
-						} else {
-							return false;
-						}
+						return lowercaseName.endsWith(".wav");
 					}
 				};
 
@@ -1292,6 +1317,11 @@ public class SpoonEzSwapsPlugin extends Plugin {
 
 	private void shitSwap(ArrayListMultimap<String, Integer> optionIndexes, MenuEntry[] entries, int index1, int index2)
 	{
+		if (index1 == index2)
+		{
+			return;
+		}
+
 		Widget eq = client.getWidget(WidgetInfo.EQUIPMENT);
 		if (client.getVar(VarClientInt.INVENTORY_TAB) == 4 && eq != null)
 		{
@@ -1329,6 +1359,18 @@ public class SpoonEzSwapsPlugin extends Plugin {
 
 			entries[index1] = entry2;
 			entries[index2] = entry1;
+
+			// Item op4 and op5 are CC_OP_LOW_PRIORITY so they get added underneath Use,
+			// but this also causes them to get sorted after client tick. Change them to
+			// CC_OP to avoid this.
+			if (entry1.isItemOp() && entry1.getType() == MenuAction.CC_OP_LOW_PRIORITY)
+			{
+				entry1.setType(MenuAction.CC_OP);
+			}
+			if (entry2.isItemOp() && entry2.getType() == MenuAction.CC_OP_LOW_PRIORITY)
+			{
+				entry2.setType(MenuAction.CC_OP);
+			}
 
 			client.setMenuEntries(entries);
 
@@ -1406,5 +1448,31 @@ public class SpoonEzSwapsPlugin extends Plugin {
 		{
 			configManager.setConfiguration("spoonezswaps", "removeOptionsStr", configManager.getConfiguration("zmenuentryswapper", "removeOptionsStr"));
 		}
+	}
+
+	@RequiredArgsConstructor
+	private enum AltarRegion
+	{
+		AIR(11082),
+		COSMIC(8266),
+		WATER(10570),
+		EARTH(10314),
+		NATURE(9290),
+		FIRE(10059),
+		BLOOD(12618),
+		LAW(9546),
+		DEATH(8522),
+		CHAOS(8778),
+		BODY(9802),
+		MIND(10826);
+
+		private static final Set<Integer> IDS = new HashSet<>(12 + 1, 1.0f);
+
+		static
+		{
+			Arrays.stream(AltarRegion.values()).mapToInt(r -> r.id).forEach(IDS::add);
+		}
+
+		private final int id;
 	}
 }

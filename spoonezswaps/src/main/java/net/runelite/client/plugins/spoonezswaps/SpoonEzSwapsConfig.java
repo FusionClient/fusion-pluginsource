@@ -242,6 +242,16 @@ public interface SpoonEzSwapsConfig extends Config
 		return false;
 	}
 
+
+	@ConfigItem(
+			keyName = "swapEmptyPouch",
+			name = "Essence Pouch",
+			description = "Swap 'Fill' with 'Empty' on rune essence pouches.<br>Only activates near altars.",
+			position = 11,
+			section = skillingSection
+	)
+	default boolean swapEmptyPouch() {return false;}
+
 	@ConfigItem(
 			keyName = "customDrop",
 			name = "Left Click Drop",
