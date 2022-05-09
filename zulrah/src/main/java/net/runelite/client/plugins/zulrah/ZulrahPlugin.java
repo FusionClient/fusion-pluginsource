@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 @PluginDescriptor(
         name = "[F] Zulrah",
         description = "All-in-One tool to help during the Zulrah fight",
-        tags = {"zulrah", "zul", "andra", "snakeling"},
+        tags = {"zulrah", "zul", "andra", "snakeling", "Fusion"},
         enabledByDefault = false
 )
 

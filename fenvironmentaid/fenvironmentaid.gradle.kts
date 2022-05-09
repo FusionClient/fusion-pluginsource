@@ -25,9 +25,9 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "3.0.5"
+version = "3.0.6"
 
-project.extra["PluginName"] = "Environment Aid"
+project.extra["PluginName"] = "[F] Environment Aid"
 project.extra["PluginDescription"] = "Display or Remove Environment Aids."
 
 dependencies {

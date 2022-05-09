@@ -26,9 +26,9 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "3.0.5"
+version = "3.0.6"
 
-project.extra["PluginName"] = "Zulrah"
+project.extra["PluginName"] = "[F] Zulrah"
 project.extra["PluginDescription"] = "All-in-one plugin for Zulrah"
 
 dependencies {

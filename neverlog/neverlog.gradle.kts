@@ -25,9 +25,9 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "3.0.5"
+version = "3.0.6"
 
-project.extra["PluginName"] = "Never Logout"
+project.extra["PluginName"] = "[F] Never Logout"
 project.extra["PluginDescription"] = "Allows you to stay logged in for 6 hours"
 
 

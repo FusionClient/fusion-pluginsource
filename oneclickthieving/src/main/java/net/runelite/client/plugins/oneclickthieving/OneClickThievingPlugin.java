@@ -9,6 +9,7 @@ import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.MenuAction;
+import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.Skill;
 import net.runelite.api.Varbits;
@@ -21,7 +22,6 @@ import net.runelite.api.queries.NPCQuery;
 import net.runelite.api.util.Text;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
-import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.Notifier;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
@@ -35,6 +35,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.overlay.OverlayManager;
 import org.pf4j.Extension;
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,10 +45,10 @@ import java.util.stream.Collectors;
 
 @Extension
 @PluginDescriptor(
-      name = "One Click Pickpocket",
-      description = "QOL for pickpocketing",
-      tags = {"sundar", "pajeet","pickpocket","skilling","thieving"},
-      enabledByDefault = false
+        name = "One Click Pickpocket",
+        description = "QOL for pickpocketing",
+        tags = {"sundar", "pajeet","pickpocket","skilling","thieving"},
+        enabledByDefault = false
 )
 
 @Slf4j
@@ -60,7 +61,7 @@ public class OneClickThievingPlugin extends Plugin
    private ItemManager itemManager;
 
    @Inject
-   private net.runelite.client.plugins.oneclickthieving.OneClickThievingConfig config;
+   private OneClickThievingConfig config;
 
    @Inject
    private Notifier notifier;
@@ -123,8 +124,14 @@ public class OneClickThievingPlugin extends Plugin
    @Subscribe
    private void onClientTick(ClientTick event)
    {
-      if(!config.clickOverride() || client.getLocalPlayer() == null || client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen())
+      if(!config.clickOverride()
+              || client.getLocalPlayer() == null
+              || client.getGameState() != GameState.LOGGED_IN
+              || client.isMenuOpen()
+              || client.getWidget(378,78) != null)//login button
+      {
          return;
+      }
       client.insertMenuItem(
               "One Click Pickpocket",
               "",
@@ -144,14 +151,14 @@ public class OneClickThievingPlugin extends Plugin
          NPC npc =  new NPCQuery().idEquals(config.npcID()).result(client).nearestTo(client.getLocalPlayer());
          if (npc != null)
          {
-            event.setMenuEntry(client.createMenuEntry(
+            setEntry(event, client.createMenuEntry(
                     "Pickpocket",
-                     npc.getName(),
-                     npc.getIndex(),
-                     MenuAction.NPC_THIRD_OPTION.getId(),
-                     0,
-                     0,
-                     false));
+                    "Pickpocket",
+                    npc.getIndex(),
+                    MenuAction.NPC_THIRD_OPTION.getId(),
+                    0,
+                    0,
+                    false));
 
             switch (getActions(npc).indexOf("Pickpocket")) {
                case 0:
@@ -220,11 +227,11 @@ public class OneClickThievingPlugin extends Plugin
          return;
       }
 
-      WidgetItem coinpouch = getWidgetItem(coinPouches);
+      Widget coinpouch = getItem(coinPouches);
 
       if(config.enableHeal() && shouldHeal)
       {
-         WidgetItem food = getItemMenu(foodMenuOption,foodBlacklist);
+         Widget food = getItemMenu(foodMenuOption, foodBlacklist);
          if (config.haltOnLowFood() && food == null)
          {
             event.consume();
@@ -234,41 +241,20 @@ public class OneClickThievingPlugin extends Plugin
          }
          else if (food != null)
          {
-            String[] foodMenuOptions = itemManager.getItemComposition(food.getId()).getInventoryActions();
-            event.setMenuEntry(client.createMenuEntry(
-                    foodMenuOptions[0],
-                    foodMenuOptions[0],
-                    food.getId(),
-                    MenuAction.ITEM_FIRST_OPTION.getId(),
-                    food.getIndex(),
-                    WidgetInfo.INVENTORY.getId(),
-                    false));
+            setEntry(event, itemEntry(food, 2));
             return;
          }
          //else fallthrough
       }
 
-      if (config.enableCoinPouch() && coinpouch != null && coinpouch.getQuantity() == 28)
+      if (config.enableCoinPouch() && coinpouch != null && coinpouch.getItemQuantity() == 28)
       {
-         event.setMenuEntry(client.createMenuEntry(
-                 "Open-all",
-                 "Coin Pouch",
-                 coinpouch.getId(),
-                 MenuAction.ITEM_FIRST_OPTION.getId(),
-                 coinpouch.getIndex(),
-                 WidgetInfo.INVENTORY.getId(),
-                 false));
+         setEntry(event, itemEntry(coinpouch, 2));
       }
       //dodgy necklace
-      else if(config.enableNecklace() && getWidgetItem(DODGY_NECKLACE_ID) != null && !isItemEquipped(List.of(DODGY_NECKLACE_ID)))
+      else if(config.enableNecklace() && getItem(List.of(DODGY_NECKLACE_ID)) != null && !isItemEquipped(List.of(DODGY_NECKLACE_ID)))
       {
-         event.setMenuEntry(client.createMenuEntry(
-                 "Wear",
-                 "Necklace",
-                 DODGY_NECKLACE_ID,
-                 MenuAction.ITEM_SECOND_OPTION.getId(),
-                 getWidgetItem(DODGY_NECKLACE_ID).getIndex(),
-                 WidgetInfo.INVENTORY.getId(), false));
+         setEntry(event, itemEntry(getItem(List.of(DODGY_NECKLACE_ID)), 3));
       }
       //varbit is shadowveil cooldown
       else if(config.enableSpell() && client.getVarbitValue(12414) == 0)
@@ -282,7 +268,7 @@ public class OneClickThievingPlugin extends Plugin
          }
          else if(client.getBoostedSkillLevel(Skill.MAGIC) >= 47)
          {
-            event.setMenuEntry(client.createMenuEntry(
+            setEntry(event, client.createMenuEntry(
                     "Cast",
                     "Shadow Veil",
                     1,
@@ -290,8 +276,8 @@ public class OneClickThievingPlugin extends Plugin
                     -1,
                     WidgetInfo.SPELL_SHADOW_VEIL.getId(),
                     false));
-         } 
-         else 
+         }
+         else
          {
             event.consume();
             notifier.notify("Magic level too low to cast this spell!");
@@ -302,17 +288,10 @@ public class OneClickThievingPlugin extends Plugin
       {
          if (client.getBoostedSkillLevel(Skill.PRAYER) == 0 && prayerTimeOut == 0)
          {
-            WidgetItem prayerPotion = getWidgetItem(prayerPotionIDs);
+            Widget prayerPotion = getItem(prayerPotionIDs);
             if (prayerPotion != null)
             {
-               event.setMenuEntry(client.createMenuEntry(
-                       "Drink",
-                       "Prayer",
-                       prayerPotion.getId(),
-                       MenuAction.ITEM_FIRST_OPTION.getId(),
-                       prayerPotion.getIndex(),
-                       WidgetInfo.INVENTORY.getId(),
-                       false));
+               setEntry(event, itemEntry(prayerPotion, 2));
             }
             else if (config.haltOnLowFood())
             {
@@ -327,7 +306,7 @@ public class OneClickThievingPlugin extends Plugin
             if ((config.prayMethod() == PrayMethod.REACTIVE_PRAY && shouldPray())
                     || config.prayMethod() == PrayMethod.LAZY_PRAY)
             {
-               event.setMenuEntry(client.createMenuEntry(
+               setEntry(event, client.createMenuEntry(
                        "Activate",
                        "Redemption",
                        1,
@@ -360,32 +339,75 @@ public class OneClickThievingPlugin extends Plugin
       return false;
    }
 
-   public WidgetItem getWidgetItem(Collection<Integer> ids) {
+
+   private Widget getItem(Collection<Integer> ids) {
+      List<Widget> matches = getItems(ids);
+      return matches.size() != 0 ? matches.get(0) : null;
+   }
+
+   private ArrayList<Widget> getItems(Collection<Integer> ids)
+   {
+      client.runScript(6009, 9764864, 28, 1, -1);
       Widget inventoryWidget = client.getWidget(WidgetInfo.INVENTORY);
-      if (inventoryWidget != null) {
-         Collection<WidgetItem> items = inventoryWidget.getWidgetItems();
-         for (WidgetItem item : items) {
-            if (ids.contains(item.getId())) {
-               return item;
+      ArrayList<Widget> matchedItems = new ArrayList<>();
+
+      if (inventoryWidget != null && inventoryWidget.getDynamicChildren() != null)
+      {
+         Widget[] items = inventoryWidget.getDynamicChildren();
+         for(Widget item : items)
+         {
+            if (ids.contains(item.getItemId()))
+            {
+               matchedItems.add(item);
             }
          }
       }
-      return null;
+      return matchedItems;
    }
 
-   private WidgetItem getWidgetItem(int id) {
-      return getWidgetItem(Collections.singletonList(id));
+   private MenuEntry itemEntry(Widget item, int action)
+   {
+      if (item == null)
+         return null;
+
+      return client.createMenuEntry(
+              "",
+              "",
+              action,
+              action < 6 ? MenuAction.CC_OP.getId() : MenuAction.CC_OP_LOW_PRIORITY.getId(),
+              item.getIndex(),
+              WidgetInfo.INVENTORY.getId(),
+              false
+      );
    }
 
-   private WidgetItem getItemMenu(Collection<String>menuOptions, Collection<Integer> ignoreIDs) {
+   private void setEntry(MenuOptionClicked event, MenuEntry entry)
+   {
+      try
+      {
+         event.setMenuOption(entry.getOption());
+         event.setMenuTarget(entry.getTarget());
+         event.setId(entry.getIdentifier());
+         event.setMenuAction(entry.getType());
+         event.setParam0(entry.getParam0());
+         event.setParam1(entry.getParam1());
+      }
+      catch (Exception e)
+      {
+         event.consume();
+      }
+   }
+
+   private Widget getItemMenu(Collection<String>menuOptions, Collection<Integer> ignoreIDs) {
+      client.runScript(6009, 9764864, 28, 1, -1);
       Widget inventoryWidget = client.getWidget(WidgetInfo.INVENTORY);
-      if (inventoryWidget != null) {
-         Collection<WidgetItem> items = inventoryWidget.getWidgetItems();
-         for (WidgetItem item : items) {
-            if (ignoreIDs.contains(item.getId())) {
+      if (inventoryWidget != null && inventoryWidget.getChildren() != null) {
+         Widget[] items = inventoryWidget.getChildren();
+         for (Widget item : items) {
+            if (ignoreIDs.contains(item.getItemId())) {
                continue;
             }
-            String[] menuActions = itemManager.getItemComposition(item.getId()).getInventoryActions();
+            String[] menuActions = itemManager.getItemComposition(item.getItemId()).getInventoryActions();
             for (String action : menuActions) {
                if (action != null && menuOptions.contains(action)) {
                   return item;

@@ -14,9 +14,8 @@ import java.util.concurrent.Executors;
 
 @Extension
 @PluginDescriptor(
-        name = "Never Logout",
+        name = "[F] Never Logout",
         description = "Enable this and you will never log out")
-@SuppressWarnings("unused")
 public class NeverLog extends Plugin
 {
     @Inject

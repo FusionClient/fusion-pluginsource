@@ -57,7 +57,7 @@ import org.pf4j.Extension;
 
 @Extension
 @PluginDescriptor(
-	name = "Environment Aid",
+	name = "[F] Environment Aid",
 	enabledByDefault = false,
 	description = "Display or Remove Environment Aids.",
 	tags = {"Barrows", "Area", "Effects", "environment", "aid"}

@@ -1240,6 +1240,9 @@ public class CoxAdditionsPlugin extends Plugin
                     }
                 }
             }
+            if (config.leftClickLeave() && option.contains("leave") && entry.getType().getId() == 1007) {
+                entry.setType(MenuAction.CC_OP);
+            }
         }
         return true;
     };
