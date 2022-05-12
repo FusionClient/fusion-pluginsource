@@ -25,9 +25,9 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "2.0.6"
+version = "2.0.7"
 
-project.extra["PluginName"] = "AutoLogHop"
+project.extra["PluginName"] = "[F] AutoLogHop"
 project.extra["PluginDescription"] = "Automatically Logout / Hop / Teleport"
 
 

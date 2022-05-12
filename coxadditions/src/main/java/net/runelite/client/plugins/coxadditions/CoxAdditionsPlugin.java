@@ -37,7 +37,7 @@ import java.util.function.Predicate;
 @PluginDescriptor(
         name = "[F] Cox Additions",
         description = "Additional plugins for the Chambers of Xeric",
-        tags = {"xeric", "olm", "chambers", "cox"},
+        tags = {"xeric", "olm", "chambers", "cox", "fusion"},
         enabledByDefault = false
 )
 @Slf4j

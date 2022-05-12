@@ -25,9 +25,9 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "2.0.5"
+version = "2.0.6"
 
-project.extra["PluginName"] = "Cox Floor Splits"
+project.extra["PluginName"] = "[F] Cox Floor Splits"
 project.extra["PluginDescription"] = "Displays your floor splits and Olm time"
 
 dependencies {

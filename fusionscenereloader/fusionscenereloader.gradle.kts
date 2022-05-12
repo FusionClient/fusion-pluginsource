@@ -25,10 +25,10 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "3.0.5"
+version = "3.0.6"
 
 project.extra["PluginName"] = "[F] Scene Reloader"
-project.extra["PluginDescription"] = "All-in-one plugin for Theatre of Blood"
+project.extra["PluginDescription"] = "Reload Instance of CoX"
 
 dependencies {
     annotationProcessor(Libraries.lombok)
