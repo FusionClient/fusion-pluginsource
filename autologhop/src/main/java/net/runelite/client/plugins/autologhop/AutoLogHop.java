@@ -9,7 +9,6 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.PlayerSpawned;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
-import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
@@ -28,14 +27,9 @@ import org.pf4j.Extension;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
 
 import static java.awt.event.KeyEvent.VK_ENTER;
 
@@ -43,9 +37,8 @@ import static java.awt.event.KeyEvent.VK_ENTER;
 @PluginDescriptor(
         name = "AutoLogHop",
         description = "Auto hops/logs out when another player is seen.",
-        tags = {"logout", "hop worlds", "auto log", "auto hop", "soxs"},
-        enabledByDefault = false,
-        hidden = false
+        tags = {"logout", "hop worlds", "auto log", "auto hop", "fusion", "Soxs"},
+        enabledByDefault = false
 )
 @Slf4j
 @SuppressWarnings("unused")
@@ -159,18 +152,15 @@ public class AutoLogHop extends Plugin {
                 //can't use royal seed pod above lv 30 wilderness.
                 if (PvPUtil.getWildernessLevelFrom(client.getLocalPlayer().getWorldLocation()) > 30)
                     return;
-                //kinda a janky way to get the inventory widget without implementing a utils of some kind.
                 Widget inventory = client.getWidget(WidgetInfo.INVENTORY);
                 if (inventory == null)
                     return;
-                Collection<WidgetItem> items = inventory.getWidgetItems();
-                for (WidgetItem item : items)
-                    if (item.getId() == ItemID.ROYAL_SEED_POD)
-                    {
-                        client.invokeMenuAction("Commune", "<col=ff9040>Royal seed pod", item.getId(), MenuAction.ITEM_FIRST_OPTION.getId(), item.getIndex(), inventory.getId());
-                        break;
-                    }
-
+                Collection<Widget> items = Arrays.asList(inventory.getDynamicChildren());
+                Optional<Widget> itemCheck = items.stream().filter(widgetItem -> widgetItem.getItemId() == ItemID.ROYAL_SEED_POD).findFirst();
+                if (itemCheck.isPresent()) {
+                    Widget item = itemCheck.get();
+                    client.invokeMenuAction("Commune", "<col=ff9040>Royal seed pod", 2, MenuAction.CC_OP.getId(), item.getIndex(), inventory.getId());
+                }
                 break;
             case ROW_GRAND_EXCHANGE:
                 //can't use ring of wealth above lv 30 wilderness.
@@ -228,6 +218,7 @@ public class AutoLogHop extends Plugin {
                     w.getTypes().contains(net.runelite.http.api.worlds.WorldType.PVP) ||
                     w.getTypes().contains(net.runelite.http.api.worlds.WorldType.SKILL_TOTAL) ||
                     w.getTypes().contains(net.runelite.http.api.worlds.WorldType.BOUNTY) ||
+                    w.getTypes().contains(net.runelite.http.api.worlds.WorldType.SEASONAL) ||
                     config.membersWorlds() != w.getTypes().contains(net.runelite.http.api.worlds.WorldType.MEMBERS))
                 continue;
             return w.getId();
@@ -328,6 +319,24 @@ public class AutoLogHop extends Plugin {
         if (player == null) {
             return false;
         }
+
+        /*if (config.skulledOnly() && config.deadmanSkulls())
+        {
+            SkullIcon[] icons =
+                    {
+                            SkullIcon.DEAD_MAN_ONE,
+                            SkullIcon.DEAD_MAN_TWO,
+                            SkullIcon.DEAD_MAN_THREE,
+                            SkullIcon.DEAD_MAN_FOUR,
+                            SkullIcon.DEAD_MAN_FIVE
+                    };
+
+            for (SkullIcon ic : icons)
+            {
+                if (player.getSkullIcon() == ic)
+                    return true;
+            }
+        }*/
 
         return player.getSkullIcon() == SkullIcon.SKULL;
     }

@@ -25,10 +25,10 @@ import ProjectVersions.rlVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "2.0.7"
+version = "2.0.8"
 
 project.extra["PluginName"] = "[F] AutoLogHop"
-project.extra["PluginDescription"] = "Automatically Logout / Hop / Teleport"
+project.extra["PluginDescription"] = "Automatically Logout / Hop / Teleport <br> Soxs Plugin"
 
 
 dependencies {
