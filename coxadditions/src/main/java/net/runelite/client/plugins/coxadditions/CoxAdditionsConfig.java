@@ -6,6 +6,7 @@ import java.awt.*;
 
 @ConfigGroup("CoxAdditions")
 public interface CoxAdditionsConfig extends Config {
+
     @ConfigSection(
             name = "Olm",
             description = "Olm Plugins",
@@ -29,6 +30,7 @@ public interface CoxAdditionsConfig extends Config {
             closedByDefault = true
     )
     String prepSection = "prep";
+
 
     // Olm Section
     @ConfigItem(
@@ -621,10 +623,21 @@ public interface CoxAdditionsConfig extends Config {
     default boolean removeUseVial() { return false; }
 
     @ConfigItem(
+            name = "Stam Reminder",
+            keyName = "stamReminder",
+            description = "For Retards who forget their stams",
+            position = 8,
+            section = prepSection)
+
+    default stamReqCox stamReminder() {
+        return stamReqCox.OFF;
+    }
+
+    @ConfigItem(
             name = "Highlight Chest Mode",
             keyName = "highlightChest",
             description = "Highlight items in your private chest based off the lists",
-            position = 8,
+            position = 9,
             section = prepSection)
     default HighlightChestMode highlightChest() {
         return HighlightChestMode.OFF;
@@ -634,7 +647,7 @@ public interface CoxAdditionsConfig extends Config {
             name = "Highlight Private Chest Items 1",
             keyName = "highlightChestItems",
             description = "Highlights items in the list in the storage chest. Must be ids.",
-            position = 9,
+            position = 10,
             section = prepSection)
     default String highlightChestItems() { return ""; }
 
@@ -643,7 +656,7 @@ public interface CoxAdditionsConfig extends Config {
             name = "Chest Items Color 1",
             keyName = "highlightChestItemsColor",
             description = "Sets color of highlight chest items",
-            position = 10,
+            position = 11,
             section = prepSection)
     default Color highlightChestItemsColor() { return Color.WHITE; }
 
@@ -651,7 +664,7 @@ public interface CoxAdditionsConfig extends Config {
             name = "Highlight Private Chest Items 2",
             keyName = "highlightChestItems2",
             description = "Highlights items in the list in the storage chest. Must be ids.",
-            position = 11,
+            position = 12,
             section = prepSection)
     default String highlightChestItems2() { return ""; }
 
@@ -660,7 +673,7 @@ public interface CoxAdditionsConfig extends Config {
             name = "Chest Items Color 2",
             keyName = "highlightChestItemsColor2",
             description = "Sets color of highlight chest items",
-            position = 12,
+            position = 13,
             section = prepSection)
     default Color highlightChestItemsColor2() { return Color.WHITE; }
 
@@ -729,5 +742,8 @@ public interface CoxAdditionsConfig extends Config {
 
     public enum ropeCrossTicksMode {
         ROPE, PLAYER, BOTH
+    }
+    public enum stamReqCox {
+        OFF, ON
     }
 }

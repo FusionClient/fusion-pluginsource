@@ -33,6 +33,8 @@ import javax.sound.sampled.Clip;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static net.runelite.client.plugins.coxadditions.CoxAdditionsConfig.*;
+
 @Extension
 @PluginDescriptor(
         name = "[F] Cox Additions",
@@ -429,7 +431,7 @@ public class CoxAdditionsPlugin extends Plugin
                     }
                     break;
                 case "vangsCycle":
-                    if (config.vangsCycle() != CoxAdditionsConfig.VangsTicksMode.OFF)
+                    if (config.vangsCycle() != VangsTicksMode.OFF)
                     {
                         for (NPC npc : client.getNpcs())
                         {
@@ -1370,6 +1372,23 @@ public class CoxAdditionsPlugin extends Plugin
             }
         }
     }
+    private boolean isInRegion() {
+        return client.getMapRegions() != null && client.getMapRegions().length > 0 && Arrays.stream(client.getMapRegions()).anyMatch((s) -> s == 4919);
+    }
+
+    @Subscribe
+    public void onMenuEntryAdded(MenuEntryAdded event) {
+        if (!isInRegion())
+            return;
+        if (client.getItemContainer(InventoryID.INVENTORY) == null)
+            return;
+        String target = Text.removeTags(event.getTarget()).toLowerCase();
+        MenuEntry[] entries = client.getMenuEntries();
+        if (((config.stamReminder() == CoxAdditionsConfig.stamReqCox.ON ||  config.stamReminder() != CoxAdditionsConfig.stamReqCox.OFF)
+                && target.contains("chambers of xeric") && !client.getItemContainer(InventoryID.INVENTORY).contains(12625)))
+            client.setMenuEntries(Arrays.copyOf(entries, entries.length - 1));
+    }
+
 
     private void swapMenuEntry(int index, MenuEntry menuEntry)
     {
