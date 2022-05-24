@@ -30,6 +30,7 @@ rootProject.name = "Fusion Plugins"
 //------------------------------------------------------------//
 
 include(":aoe")
+include(":azscreenmarkers")
 include(":autologhop")
 include(":autohop")
 include(":blackjack")
@@ -76,6 +77,10 @@ include(":theatre")
 include(":tickdebug")
 include(":yurinex")
 include(":zulrah")
+
+//private
+
+//include(":pulseorb")
 
 for (project in rootProject.children) {
     project.apply {
