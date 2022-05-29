@@ -30,7 +30,6 @@ rootProject.name = "Fusion Plugins"
 //------------------------------------------------------------//
 
 include(":aoe")
-include(":azscreenmarkers")
 include(":autologhop")
 include(":autohop")
 include(":blackjack")
@@ -42,6 +41,7 @@ include(":coxadditions")
 include(":fenvironmentaid")
 include(":entityhiderplus")
 include(":effecttimers")
+include(":fusiondialogue")
 include(":fusionjadhelper")
 include(":fusionscenereloader")
 include(":fusionnightmare")

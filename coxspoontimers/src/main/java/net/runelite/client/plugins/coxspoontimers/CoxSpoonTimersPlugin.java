@@ -1,5 +1,6 @@
 package net.runelite.client.plugins.coxspoontimers;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Provides;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
@@ -7,20 +8,28 @@ import net.runelite.api.events.*;
 import net.runelite.client.RuneLite;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.coxspoontimers.utils.CoxUtil;
 import net.runelite.client.plugins.coxspoontimers.utils.MiscUtil;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.ImageUtil;
+import net.runelite.client.util.LinkBrowser;
 import net.runelite.client.util.Text;
 import org.pf4j.Extension;
 
 import javax.inject.Inject;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static net.runelite.client.RuneLite.COXTIMERS_DIR;
+import static net.runelite.client.RuneLite.SCREENSHOT_DIR;
 import static net.runelite.client.plugins.coxspoontimers.utils.CoxUtil.*;
 
 @Extension
@@ -28,7 +37,8 @@ import static net.runelite.client.plugins.coxspoontimers.utils.CoxUtil.*;
         name = "[F] CoX Timers",
         description = "Time tracking for CoX rooms"
 )
-public class CoxSpoonTimersPlugin extends Plugin {
+public class CoxSpoonTimersPlugin extends Plugin
+{
 
     @Inject
     private Client client;
@@ -41,6 +51,13 @@ public class CoxSpoonTimersPlugin extends Plugin {
 
     @Inject
     private CoxSpoonTimersOverlay overlay;
+
+    @Inject
+    private ClientToolbar clientToolbar;
+
+    @Inject
+    private KeyManager keyManager;
+
 
     // Room state
     public boolean in_raid;
@@ -66,19 +83,36 @@ public class CoxSpoonTimersPlugin extends Plugin {
 
     public int mageStart = -1;
 
+    private NavigationButton titleBarButton;
+
+
+
     @Provides
-    CoxSpoonTimersConfig provideConfig(ConfigManager configManager) {
+    CoxSpoonTimersConfig provideConfig(ConfigManager configManager)
+    {
         return configManager.getConfig(CoxSpoonTimersConfig.class);
     }
 
-    protected void startUp() throws Exception {
-        overlayManager.add(overlay);
-        reset();
-        if (!TIMES_DIR.exists())
-        {
-            TIMES_DIR.mkdirs();
-        }
+    protected void startUp() throws Exception
+    {
+        final BufferedImage iconImage = ImageUtil.loadImageResource(getClass(), "coxtimes.png");
+
+        COXTIMERS_DIR.mkdirs();
+
+        titleBarButton = NavigationButton.builder()
+                .tab(false)
+                .tooltip("Open CoX Times")
+                .icon(iconImage)
+                .onClick(()  ->
+                        {
+                            LinkBrowser.open(COXTIMERS_DIR.toString());
+                        })
+                        .build();
+
+        clientToolbar.addNavigation(titleBarButton);
     }
+
+
 
     protected void shutDown() throws Exception {
         overlayManager.remove(overlay);
