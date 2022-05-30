@@ -41,59 +41,86 @@ import java.util.Objects;
 @PluginDescriptor(
         name = "[F] Auto Dialogue",
         description = "Because we lazy as fuck",
-        tags = {"Continue, Fusion, lazy"},
+        tags = {"continue, fusion, lazy"},
         enabledByDefault = false
 )
-public class AutoDialoguePlugin extends Plugin {
+public class AutoDialoguePlugin extends Plugin
+{
 
     @Inject
     private Client client;
 
     @Subscribe
-    public void onGameTick(GameTick event) {
+    public void onGameTick(GameTick event)
+    {
 
-        Widget playerDialog = client.getWidget(217,5);
-        Widget npcDialog = client.getWidget(231,5);
-        Widget potions = client.getWidget(270,14);
+        Widget playerDialog = client.getWidget(217, 5);
+        Widget npcDialog = client.getWidget(231, 5);
+        Widget potions = client.getWidget(270, 14);
+        Widget smithing = client.getWidget(312, 0);
+        Widget crafting = client.getWidget(446, 0);
+        Widget fletchshaft = client.getWidget(270, 14);
 
-        if (npcDialog!= null && (npcDialog.getText().contains("continue")))
         {
+            if (npcDialog != null && (npcDialog.getText().contains("continue")))
             {
+                {
+                    sendKey(KeyEvent.VK_SPACE, client, false);
+                }
+            }
+
+            if (playerDialog != null && (playerDialog.getText().contains("continue")))
+            {
+                {
+                    sendKey(KeyEvent.VK_SPACE, client, false);
+                }
+            }
+
+
+            // Potions
+            if (potions != null && (potions.getName().contains(" potion")
+                    || potions.getName().contains(" restore")
+                    || potions.getName().contains(" brew")
+                    || potions.getName().contains(" strength")
+                    || potions.getName().contains(" attack")
+                    || potions.getName().contains(" defence")
+                    || potions.getName().contains(" combat")
+                    || potions.getName().contains("Antidote++")
+                    || potions.getName().contains("Anti-")
+                    || potions.getName().contains("antifire")
+                    || potions.getName().contains(" serum")))
+                pressKey((char) KeyEvent.VK_1);
+
+            // Smithing
+            if (smithing != null)
+            {
+                smithing.getName();
                 sendKey(KeyEvent.VK_SPACE, client, false);
             }
-        }
 
-        if (playerDialog!= null && (playerDialog.getText().contains("continue")))
-        {
+            // Crafting
+            if (crafting != null)
             {
+                crafting.getName();
                 sendKey(KeyEvent.VK_SPACE, client, false);
             }
+            // Fletching
+            if (fletchshaft != null && (fletchshaft.getName().contains(" shafts")))
+                pressKey((char) KeyEvent.VK_1);
+
+            if (fletchshaft != null && (fletchshaft.getName().contains(" arrow")))
+                pressKey((char) KeyEvent.VK_1);
         }
+    }
 
 
-        // Potions;  To add more options
-        if (potions != null && (potions.getName().contains(" potion")
-            || potions.getName().contains(" restore")
-            || potions.getName().contains(" brew")
-            || potions.getName().contains(" strength")
-            || potions.getName().contains(" attack")
-            || potions.getName().contains(" defence")
-            || potions.getName().contains(" combat")
-            || potions.getName().contains(" venom")
-            || potions.getName().contains(" antifire")
-            || potions.getName().contains(" serum")))
-            pressKey((char) KeyEvent.VK_1);
-            }
-
-
-
-    public void pressKey(char key) {
+    public void pressKey ( char key){
         keyEvent(401, key);
         keyEvent(402, key);
         keyEvent(400, key);
     }
 
-    private void keyEvent(int id, char key) {
+        private void keyEvent ( int id, char key){
         KeyEvent e = new KeyEvent(
                 client.getCanvas(), id, System.currentTimeMillis(),
                 0, KeyEvent.VK_UNDEFINED, key
@@ -101,27 +128,28 @@ public class AutoDialoguePlugin extends Plugin {
         client.getCanvas().dispatchEvent(e);
     }
 
-    public static void sendKey(int key, Client client, boolean unicode)
-    {
-        keyEvent(KeyEvent.KEY_PRESSED, key, client);
-        if (unicode)
+        public static void sendKey ( int key, Client client,boolean unicode)
         {
-            keyEvent(KeyEvent.KEY_TYPED, key, client);
+            keyEvent(KeyEvent.KEY_PRESSED, key, client);
+            if (unicode)
+            {
+                keyEvent(KeyEvent.KEY_TYPED, key, client);
+            }
+            keyEvent(KeyEvent.KEY_RELEASED, key, client);
         }
-        keyEvent(KeyEvent.KEY_RELEASED, key, client);
+
+        static void keyEvent ( int id, int key, Client client)
+        {
+            KeyEvent e = new KeyEvent(
+                    client.getCanvas(), id, System.currentTimeMillis(),
+                    0, key, KeyEvent.CHAR_UNDEFINED
+            );
+
+            if (client.getGameState() != GameState.LOGGED_IN)
+            {
+                return;
+            }
+
+            client.getCanvas().dispatchEvent(e);
+        }
     }
-
-    static void keyEvent(int id, int key, Client client)
-    {
-        KeyEvent e = new KeyEvent(
-                client.getCanvas(), id, System.currentTimeMillis(),
-                0, key, KeyEvent.CHAR_UNDEFINED
-        );
-
-        if (client.getGameState() != GameState.LOGGED_IN)
-        {
-            return;
-        }
-
-        client.getCanvas().dispatchEvent(e);
-    }}
