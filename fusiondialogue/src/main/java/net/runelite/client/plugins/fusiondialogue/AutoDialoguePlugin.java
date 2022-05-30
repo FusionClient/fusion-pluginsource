@@ -27,6 +27,7 @@ package net.runelite.client.plugins.fusiondialogue;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -50,32 +51,40 @@ public class AutoDialoguePlugin extends Plugin {
 
     @Subscribe
     public void onGameTick(GameTick event) {
-        if (client.getWidget(231,5)!= null)
+
+        Widget playerDialog = client.getWidget(217,5);
+        Widget npcDialog = client.getWidget(231,5);
+        Widget potions = client.getWidget(270,14);
+
+        if (npcDialog!= null && (npcDialog.getText().contains("continue")))
         {
-            if (Objects.requireNonNull(client.getWidget(231, 5)).getText().contains("continue"))
             {
                 sendKey(KeyEvent.VK_SPACE, client, false);
             }
         }
-        if (client.getWidget(217, 5)!= null)
+
+        if (playerDialog!= null && (playerDialog.getText().contains("continue")))
         {
-            if (Objects.requireNonNull(client.getWidget(217, 5)).getText().contains("continue"))
             {
                 sendKey(KeyEvent.VK_SPACE, client, false);
             }
         }
+
+
         // Potions;  To add more options
-        if (client.getWidget(270,14) != null) {
-            if (Objects.requireNonNull(client.getWidget(270,14)).getName().contains(" potion")
-            || (Objects.requireNonNull(client.getWidget(270,14))).getName().contains(" restore")
-            || (Objects.requireNonNull(client.getWidget(270,14))).getName().contains(" brew")
-            || (Objects.requireNonNull(client.getWidget(270,14))).getName().contains(" strength")
-            || (Objects.requireNonNull(client.getWidget(270,14))).getName().contains(" attack")
-            || (Objects.requireNonNull(client.getWidget(270,14))).getName().contains(" defence")
-            || (Objects.requireNonNull(client.getWidget(270,14))).getName().contains(" combat"))
-                pressKey((char) KeyEvent.VK_1);
+        if (potions != null && (potions.getName().contains(" potion")
+            || potions.getName().contains(" restore")
+            || potions.getName().contains(" brew")
+            || potions.getName().contains(" strength")
+            || potions.getName().contains(" attack")
+            || potions.getName().contains(" defence")
+            || potions.getName().contains(" combat")
+            || potions.getName().contains(" venom")
+            || potions.getName().contains(" antifire")
+            || potions.getName().contains(" serum")))
+            pressKey((char) KeyEvent.VK_1);
             }
-        }
+
 
 
     public void pressKey(char key) {
