@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static net.runelite.client.RuneLite.COXTIMERS_DIR;
 import static net.runelite.client.RuneLite.SCREENSHOT_DIR;
@@ -160,7 +161,7 @@ public class CoxSpoonTimersPlugin extends Plugin
                 cryp[i] = -1;
                 continue;
             }
-            int flags = client.getCollisionMaps()[p].getFlags()[x][y];
+            int flags = (Objects.requireNonNull(client.getCollisionMaps()))[p].getFlags()[x][y];
             if ((flags & 0x100) == 0) {
                 StringBuilder mes = new StringBuilder();
                 mes.append(getroom_sort(i) == 'C' ? "Combat room `" : "Puzzle `");

@@ -60,6 +60,8 @@ public class AutoDialoguePlugin extends Plugin
         Widget smithing = client.getWidget(312, 0);
         Widget crafting = client.getWidget(446, 0);
         Widget fletchshaft = client.getWidget(270, 14);
+        Widget cannonballs = client.getWidget(270, 14);
+
 
         {
             if (npcDialog != null && (npcDialog.getText().contains("continue")))
@@ -97,6 +99,8 @@ public class AutoDialoguePlugin extends Plugin
                 smithing.getName();
                 sendKey(KeyEvent.VK_SPACE, client, false);
             }
+            if (cannonballs != null && (cannonballs.getName().contains("Cannonballs")))
+                pressKey((char) KeyEvent.VK_1);
 
             // Crafting
             if (crafting != null)
@@ -104,6 +108,7 @@ public class AutoDialoguePlugin extends Plugin
                 crafting.getName();
                 sendKey(KeyEvent.VK_SPACE, client, false);
             }
+
             // Fletching
             if (fletchshaft != null && (fletchshaft.getName().contains(" shafts")))
                 pressKey((char) KeyEvent.VK_1);
@@ -112,7 +117,6 @@ public class AutoDialoguePlugin extends Plugin
                 pressKey((char) KeyEvent.VK_1);
         }
     }
-
 
     public void pressKey ( char key){
         keyEvent(401, key);
