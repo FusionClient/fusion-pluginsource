@@ -56,11 +56,9 @@ public class AutoDialoguePlugin extends Plugin
 
         Widget playerDialog = client.getWidget(217, 5);
         Widget npcDialog = client.getWidget(231, 5);
-        Widget potions = client.getWidget(270, 14);
+        Widget bankSkills = client.getWidget(270, 14);
         Widget smithing = client.getWidget(312, 0);
         Widget crafting = client.getWidget(446, 0);
-        Widget fletchshaft = client.getWidget(270, 14);
-        Widget cannonballs = client.getWidget(270, 14);
 
 
         {
@@ -79,19 +77,24 @@ public class AutoDialoguePlugin extends Plugin
             }
 
 
-            // Potions
-            if (potions != null && (potions.getName().contains(" potion")
-                    || potions.getName().contains(" restore")
-                    || potions.getName().contains(" brew")
-                    || potions.getName().contains(" strength")
-                    || potions.getName().contains(" attack")
-                    || potions.getName().contains(" defence")
-                    || potions.getName().contains(" combat")
-                    || potions.getName().contains("Antidote++")
-                    || potions.getName().contains("Anti-")
-                    || potions.getName().contains("antifire")
-                    || potions.getName().contains(" serum")))
-                pressKey((char) KeyEvent.VK_1);
+            // Banking Skills
+            if (bankSkills != null && (bankSkills.getName().contains(" potion")
+                    || bankSkills.getName().contains(" restore")
+                    || bankSkills.getName().contains(" brew")
+                    || bankSkills.getName().contains(" strength")
+                    || bankSkills.getName().contains(" attack")
+                    || bankSkills.getName().contains(" defence")
+                    || bankSkills.getName().contains(" combat")
+                    || bankSkills.getName().contains("Antidote++")
+                    || bankSkills.getName().contains("Anti-")
+                    || bankSkills.getName().contains("antifire")
+                    || bankSkills.getName().contains(" serum")
+                    || bankSkills.getName().contains(" shafts")
+                    || bankSkills.getName().contains(" arrow")
+                    || bankSkills.getName().contains("Cannonballs")
+                    || bankSkills.getName().contains("Uncut")
+                    || bankSkills.getName().contains(" bolt tips")))
+                    pressKey((char) KeyEvent.VK_1);
 
             // Smithing
             if (smithing != null)
@@ -99,8 +102,6 @@ public class AutoDialoguePlugin extends Plugin
                 smithing.getName();
                 sendKey(KeyEvent.VK_SPACE, client, false);
             }
-            if (cannonballs != null && (cannonballs.getName().contains("Cannonballs")))
-                pressKey((char) KeyEvent.VK_1);
 
             // Crafting
             if (crafting != null)
@@ -108,13 +109,6 @@ public class AutoDialoguePlugin extends Plugin
                 crafting.getName();
                 sendKey(KeyEvent.VK_SPACE, client, false);
             }
-
-            // Fletching
-            if (fletchshaft != null && (fletchshaft.getName().contains(" shafts")))
-                pressKey((char) KeyEvent.VK_1);
-
-            if (fletchshaft != null && (fletchshaft.getName().contains(" arrow")))
-                pressKey((char) KeyEvent.VK_1);
         }
     }
 
