@@ -1,6 +1,7 @@
 package net.runelite.client.plugins.socket.plugins.socketping;
 
 import com.google.common.collect.ImmutableMap;
+
 import net.runelite.api.Point;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;

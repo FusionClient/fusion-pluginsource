@@ -113,14 +113,6 @@ public class CoxSpoonTimersPlugin extends Plugin
         clientToolbar.addNavigation(titleBarButton);
     }
 
-
-
-    protected void shutDown() throws Exception {
-        overlayManager.remove(overlay);
-        reset();
-        timeFileStr.clear();
-    }
-
     protected void reset() {
         in_raid = false;
         roomname = "";
@@ -415,11 +407,16 @@ public class CoxSpoonTimersPlugin extends Plugin
             for (String msg : timeFileStr){
                 writer.write(msg + "\r\n");
             }
-            writer.write("------------------------------------------------------------------------------------------------\r\n" +
-                    "------------------------------------------------------------------------------------------------\r\n");
+            writer.write("------------------------------------------------------------------------------------------------\r\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
         writer.close();
+    }
+
+    protected void shutDown() throws Exception {
+        overlayManager.remove(overlay);
+        reset();
+        timeFileStr.clear();
     }
 }

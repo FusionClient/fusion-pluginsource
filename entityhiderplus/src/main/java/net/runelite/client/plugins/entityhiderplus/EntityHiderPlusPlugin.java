@@ -1,12 +1,11 @@
 package net.runelite.client.plugins.entityhiderplus;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Provides;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.MenuEntry;
-import net.runelite.api.NPC;
+import net.runelite.api.*;
 import net.runelite.api.events.*;
 import net.runelite.api.util.Text;
+import net.runelite.client.callback.Hooks;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -25,7 +24,7 @@ import java.util.*;
         name = "[F] Entity Hider Plus",
         enabledByDefault = false,
         description = "Hide dead NPCs animations",
-        tags = {"npcs", "fusion", "entity"}
+        tags = {"npcs", "fusion", ""}
 )
 public class EntityHiderPlusPlugin extends Plugin {
     @Inject
@@ -40,13 +39,16 @@ public class EntityHiderPlusPlugin extends Plugin {
     @Inject
     private OverlayManager overlayManager;
 
+    @Inject
+    private Hooks hooks;
+
+    private final Hooks.RenderableDrawListener drawListener = this::shouldDraw;
+
     @Provides
     EntityHiderPlusConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(EntityHiderPlusConfig.class);
     }
 
-    public ArrayList<Integer> hiddenIndices;
-    public ArrayList<Integer> animationHiddenIndices;
     public Set<String> hideAliveNPCsName;
     public Set<Integer> hideAliveNPCsID;
     public Set<Integer> hideNPCsOnAnimationID;
@@ -61,76 +63,55 @@ public class EntityHiderPlusPlugin extends Plugin {
 
     @Override
     protected void startUp() {
-        client.setIsHidingEntities(true);
-        //client.setDeadNPCsHidden(true);
-        hiddenIndices = new ArrayList<>();
-        animationHiddenIndices = new ArrayList<>();
         updateConfig();
-        this.overlayManager.add(overlay);
-    }
-
-    @Subscribe
-    public void onGameStateChanged(GameStateChanged event) {
-        if (event.getGameState() == GameState.LOGGED_IN) {
-            client.setIsHidingEntities(true);
-            clearHiddenNpcs();
-        }
+        overlayManager.add(overlay);
+        hooks.registerRenderableDrawListener(drawListener);
     }
 
     @Override
     protected void shutDown() {
-        this.overlayManager.remove(overlay);
-        client.setIsHidingEntities(false);
-        //client.setDeadNPCsHidden(false);
-        clearHiddenNpcs();
-        hiddenIndices = null;
-        animationHiddenIndices = null;
+        overlayManager.remove(overlay);
+        hooks.unregisterRenderableDrawListener(drawListener);
     }
 
-    @Subscribe
-    public void onClientTick(ClientTick event) {
-        for (NPC npc : client.getNpcs()) {
-            if (npc != null) {
-                if (!olmIDs.contains(npc.getId()) && !totemIDs.contains(npc.getId())) {
-                    if (((npc.getName() != null && matchWildCards(hideAliveNPCsName, Text.standardize(npc.getName())))
-                            || (hideAliveNPCsID.contains(npc.getId()))
-                            || (hideNPCsOnAnimationID.contains(npc.getAnimation()))
-                            || (config.hideDeadNPCs() && npc.getHealthRatio() == 0 && npc.getName() != null && !matchWildCards(blacklistName, Text.standardize(npc.getName())) && !blacklistID.contains(npc.getId()))
-                            || (npc.getHealthRatio() == 0 && npc.getName() != null && matchWildCards(hideNPCsOnDeathName, Text.standardize(npc.getName())))
-                            || (npc.getHealthRatio() == 0 && hideNPCsOnDeathID.contains(npc.getId())))) {
-                        if (!hiddenIndices.contains(npc.getIndex())) {
-                            setHiddenNpc(npc, true);
-                        }
-                    }
-                }
+    @VisibleForTesting
+    boolean shouldDraw(Renderable renderable, boolean drawingUI)
+    {
+        if (renderable instanceof NPC)
+        {
+            NPC npc = (NPC) renderable;
 
-                if (animationHiddenIndices.contains(npc.getIndex()) && !hideNPCsOnAnimationID.contains(npc.getAnimation())) {
-                    if (hiddenIndices.contains(npc.getIndex())) {
-                        setHiddenNpc(npc, false);
-                    }
-                }
-
-                if (hiddenIndices.contains(npc.getIndex()) && (!animationHiddenIndices.contains(npc.getIndex()) || !hideNPCsOnAnimationID.contains(npc.getAnimation()))
-                        && !hideAliveNPCsID.contains(npc.getId()) && (npc.getName() != null && !matchWildCards(hideAliveNPCsName, Text.standardize(npc.getName())))
-                        && npc.getHealthRatio() > 0) {
-                    System.out.println("Unhide: " + npc.getName());
-                    setHiddenNpc(npc, false);
+            if (!olmIDs.contains(npc.getId()) && !totemIDs.contains(npc.getId()))
+            {
+                if ((npc.getName() != null && matchWildCards(hideAliveNPCsName, Text.standardize(npc.getName())))
+                        || (hideAliveNPCsID.contains(npc.getId()))
+                        || (hideNPCsOnAnimationID.contains(npc.getAnimation()))
+                        || (config.hideDeadNPCs() && npc.getHealthRatio() == 0 && npc.getName() != null && !matchWildCards(blacklistName, Text.standardize(npc.getName())) && !blacklistID.contains(npc.getId()))
+                        || (npc.getHealthRatio() == 0 && npc.getName() != null && matchWildCards(hideNPCsOnDeathName, Text.standardize(npc.getName())))
+                        || (npc.getHealthRatio() == 0 && hideNPCsOnDeathID.contains(npc.getId())))
+                {
+                    return false;
                 }
             }
-        }
-    }
 
-    @Subscribe
-    public void onNpcDespawned(NpcDespawned event) {
-        if (hiddenIndices.contains(event.getNpc().getIndex())) {
-            setHiddenNpc(event.getNpc(), false);
+            if (!hideNPCsOnAnimationID.contains(npc.getAnimation()) && !hideAliveNPCsID.contains(npc.getId()) && (npc.getName() != null
+                    && !matchWildCards(hideAliveNPCsName, Text.standardize(npc.getName()))) && (!npc.isDead() || !config.hideDeadNPCs()))
+            {
+                return true;
+            }
         }
+        else if (renderable instanceof GraphicsObject)
+        {
+            GraphicsObject graphicsObject = (GraphicsObject) renderable;
+            return !hideGraphicsObjects.contains(graphicsObject.getId());
+        }
+
+        return true;
     }
 
     @Subscribe
     public void onConfigChanged(ConfigChanged event) {
         if (event.getGroup().equals("ehplus")) {
-            client.setIsHidingEntities(true);
             updateConfig();
         }
     }
@@ -187,36 +168,6 @@ public class EntityHiderPlusPlugin extends Plugin {
                 hideGraphicsObjects.add(Integer.parseInt(s));
             } catch (NumberFormatException ignored) {
             }
-
-        }
-    }
-
-    private void setHiddenNpc(NPC npc, boolean hidden) {
-
-        List<Integer> newHiddenNpcIndicesList = client.getHiddenNpcIndices();
-        if (hidden) {
-            newHiddenNpcIndicesList.add(npc.getIndex());
-            hiddenIndices.add(npc.getIndex());
-            if (hideNPCsOnAnimationID.contains(npc.getAnimation())) {
-                animationHiddenIndices.add(npc.getIndex());
-            }
-        } else {
-            if (newHiddenNpcIndicesList.contains(npc.getIndex())) {
-                newHiddenNpcIndicesList.remove((Integer) npc.getIndex());
-                hiddenIndices.remove((Integer) npc.getIndex());
-                animationHiddenIndices.remove((Integer) npc.getIndex());
-            }
-        }
-        client.setHiddenNpcIndices(newHiddenNpcIndicesList);
-    }
-
-    private void clearHiddenNpcs() {
-        if (!hiddenIndices.isEmpty()) {
-            List<Integer> newHiddenNpcIndicesList = client.getHiddenNpcIndices();
-            newHiddenNpcIndicesList.removeAll(hiddenIndices);
-            client.setHiddenNpcIndices(newHiddenNpcIndicesList);
-            hiddenIndices.clear();
-            animationHiddenIndices.clear();
         }
     }
 
@@ -232,19 +183,6 @@ public class EntityHiderPlusPlugin extends Plugin {
     }
 
     @Subscribe
-    public void onGraphicsObjectCreated(GraphicsObjectCreated event){
-        if(hideGraphicsObjects.contains(event.getGraphicsObject().getId())){
-            Field f = event.getGraphicsObject().getClass().getDeclaredFields()[9];
-            f.setAccessible(true);
-            try {
-                f.setBoolean(event.getGraphicsObject(), true);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Subscribe
     public void onMenuEntryAdded(MenuEntryAdded event) {
         int type = event.getType();
         int id = event.getIdentifier();
@@ -253,12 +191,12 @@ public class EntityHiderPlusPlugin extends Plugin {
             try {
                 if(type >= 7 && type <= 13 && type != 8){
                     NPC npc = this.client.getCachedNPCs()[id];
-                        if (npc != null && !olmIDs.contains(npc.getId()) && !totemIDs.contains(npc.getId())){
-                            if (npc.getName() != null && npc.isDead()) {
-                                String name = npc.getName().toLowerCase();
-                                if (!blacklistID.contains(id) && !blacklistName.contains(name)) {
-                                    for(String str : blacklistName){
-                                        if(str.contains("*") && ((str.startsWith("*") && str.endsWith("*") && name.contains(str.replace("*", ""))) || (str.startsWith("*") && name.endsWith(str.replace("*", "")))
+                    if (npc != null && !olmIDs.contains(npc.getId()) && !totemIDs.contains(npc.getId())){
+                        if (npc.getName() != null && npc.isDead()) {
+                            String name = npc.getName().toLowerCase();
+                            if (!blacklistID.contains(id) && !blacklistName.contains(name)) {
+                                for(String str : blacklistName){
+                                    if(str.contains("*") && ((str.startsWith("*") && str.endsWith("*") && name.contains(str.replace("*", ""))) || (str.startsWith("*") && name.endsWith(str.replace("*", "")))
                                             || name.startsWith(str.replace("*", "")))){
                                         return;
                                     }

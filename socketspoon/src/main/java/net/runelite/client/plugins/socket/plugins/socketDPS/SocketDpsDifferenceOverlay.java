@@ -2,13 +2,13 @@ package net.runelite.client.plugins.socket.plugins.socketDPS;
 
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
+import net.runelite.client.party.PartyService;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.components.ComponentConstants;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 import net.runelite.client.util.QuantityFormatter;
-import net.runelite.client.ws.PartyService;
 
 import javax.inject.Inject;
 import java.awt.*;
